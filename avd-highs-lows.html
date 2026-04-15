@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AVD 2025 — Highs & Lows · Payments PJ</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22253a;
+    --border: #2e3250;
+    --accent: #6c63ff;
+    --green: #10b981;
+    --yellow: #f59e0b;
+    --red: #ef4444;
+    --blue: #3b82f6;
+    --text: #e8eaf6;
+    --muted: #8a8fb5;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, #1a1d27 0%, #0f1117 60%, #1a0533 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 36px 40px 28px;
+    position: relative; overflow: hidden;
+  }
+  header::before {
+    content: ''; position: absolute; top: -60px; right: -60px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(108,99,255,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(108,99,255,0.15); border: 1px solid rgba(108,99,255,0.3);
+    border-radius: 20px; padding: 4px 14px; font-size: 11px; font-weight: 700;
+    color: #a99fff; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 14px;
+  }
+  header h1 { font-size: 26px; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
+  header p { color: var(--muted); font-size: 13px; margin-top: 8px; }
+
+  /* ── Toolbar ── */
+  .toolbar {
+    background: var(--surface2); border-bottom: 1px solid var(--border);
+    padding: 16px 40px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .toolbar-label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-right: 4px; }
+  .filter-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .filter-btn {
+    padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--muted); font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all .15s; white-space: nowrap;
+  }
+  .filter-btn:hover { border-color: var(--accent); color: var(--text); }
+  .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .filter-btn.active-green { background: var(--green); border-color: var(--green); color: #fff; }
+  .search-wrap { margin-left: auto; position: relative; }
+  .search-wrap input {
+    background: var(--surface); border: 1px solid var(--border); color: var(--text);
+    padding: 7px 14px 7px 36px; border-radius: 8px; font-size: 13px; width: 220px; outline: none;
+    transition: border-color .15s;
+  }
+  .search-wrap input:focus { border-color: var(--accent); }
+  .search-wrap::before {
+    content: '🔍'; position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    font-size: 13px; pointer-events: none;
+  }
+  .count-badge {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+    padding: 5px 14px; font-size: 12px; color: var(--muted); font-weight: 600;
+  }
+  #count-num { color: var(--text); font-weight: 700; }
+
+  /* ── Dev Grid ── */
+  .dev-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px; padding: 32px 40px;
+    max-width: 1400px; margin: 0 auto;
+  }
+
+  /* ── Dev Card ── */
+  .dev-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; transition: transform .15s, box-shadow .15s;
+    cursor: pointer;
+  }
+  .dev-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+  .dev-card.hidden { display: none; }
+
+  .card-header {
+    padding: 16px 20px 14px; background: var(--surface2);
+    border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 14px;
+  }
+  .avatar {
+    width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-size: 16px; font-weight: 700; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--accent), #a78bfa);
+    color: #fff;
+  }
+  .card-info { flex: 1; min-width: 0; }
+  .card-name { font-size: 14px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-meta { font-size: 11px; color: var(--muted); margin-top: 3px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .meta-tag {
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 4px; padding: 1px 7px; font-size: 10px; font-weight: 600; letter-spacing: 0.3px;
+  }
+  .meta-tag.time { color: #a99fff; }
+  .meta-tag.cargo { color: #7ec8e3; }
+  .score-block { text-align: right; flex-shrink: 0; }
+  .score-num { font-size: 22px; font-weight: 800; line-height: 1; }
+  .score-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .avaliacao-badge {
+    display: inline-block; padding: 2px 9px; border-radius: 4px; font-size: 10px; font-weight: 700;
+    margin-top: 5px; text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .badge-acima { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+  .badge-dentro { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.25); }
+
+  /* ── Radar mini ── */
+  .radar-wrap { padding: 12px 20px; border-bottom: 1px solid var(--border); }
+  .radar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .radar-label { font-size: 10px; color: var(--muted); width: 90px; flex-shrink: 0; }
+  .radar-bar-bg { flex: 1; height: 5px; background: rgba(255,255,255,0.07); border-radius: 4px; overflow: hidden; }
+  .radar-bar-fill { height: 100%; border-radius: 4px; transition: width .4s; }
+  .radar-val { font-size: 10px; color: var(--muted); width: 24px; text-align: right; flex-shrink: 0; }
+
+  /* ── Highs & Lows ── */
+  .hl-section { padding: 0; }
+  .hl-toggle {
+    width: 100%; background: none; border: none; cursor: pointer;
+    padding: 12px 20px; display: flex; align-items: center; justify-content: space-between;
+    color: var(--text); font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.5px; border-top: 1px solid var(--border); transition: background .15s;
+  }
+  .hl-toggle:hover { background: rgba(255,255,255,0.03); }
+  .hl-toggle .toggle-icon { font-size: 14px; transition: transform .2s; }
+  .hl-toggle.open .toggle-icon { transform: rotate(180deg); }
+  .hl-content { display: none; padding: 0 20px 16px; }
+  .hl-content.open { display: block; }
+
+  .hl-group { margin-bottom: 14px; }
+  .hl-group:last-child { margin-bottom: 0; }
+  .hl-group-title {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+    margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+  }
+  .hl-group-title.highs { color: var(--green); }
+  .hl-group-title.lows { color: var(--yellow); }
+  .hl-item {
+    display: flex; gap: 8px; margin-bottom: 7px; font-size: 12px; line-height: 1.5;
+    color: #c8d0e8;
+  }
+  .hl-bullet { flex-shrink: 0; margin-top: 3px; font-size: 10px; }
+  .hl-item strong { color: #fff; }
+
+  /* ── Gestor summary ── */
+  .gestor-quote {
+    background: rgba(108,99,255,0.07); border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0; padding: 10px 14px; margin-top: 10px;
+    font-size: 11px; color: #c5c0f0; line-height: 1.6; font-style: italic;
+  }
+
+  /* ── Footer ── */
+  footer {
+    border-top: 1px solid var(--border); padding: 20px 40px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .footer-left { font-size: 12px; color: var(--muted); }
+  .pp-logo { color: var(--accent); font-weight: 700; font-size: 13px; }
+
+  /* ── Responsivo ── */
+  @media (max-width: 768px) {
+    .dev-grid { padding: 20px 16px; grid-template-columns: 1fr; }
+    .toolbar { padding: 12px 16px; }
+    header { padding: 24px 20px; }
+    .search-wrap { margin-left: 0; width: 100%; }
+    .search-wrap input { width: 100%; }
+    footer { padding: 16px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-badge">📊 AVD 2025 · Payments PJ</div>
+  <h1>Highs & Lows — Devolutiva de Feedback</h1>
+  <p>Avaliação de Desempenho 2025 · 13 avaliados com respostas · Dados cruzados com métricas de fluxo de março/2026</p>
+</header>
+
+<div class="toolbar">
+  <span class="toolbar-label">Time</span>
+  <div class="filter-group" id="filter-time">
+    <button class="filter-btn active" data-filter="time" data-val="all" onclick="filterBy('time','all',this)">Todos</button>
+    <button class="filter-btn" data-filter="time" data-val="PJPY" onclick="filterBy('time','PJPY',this)">Payments PJ</button>
+    <button class="filter-btn" data-filter="time" data-val="BPJPIF" onclick="filterBy('time','BPJPIF',this)">PIX na IF</button>
+  </div>
+  <span class="toolbar-label" style="margin-left:8px">Avaliação</span>
+  <div class="filter-group" id="filter-avaliacao">
+    <button class="filter-btn active" data-filter="avaliacao" data-val="all" onclick="filterBy('avaliacao','all',this)">Todas</button>
+    <button class="filter-btn" data-filter="avaliacao" data-val="acima" onclick="filterBy('avaliacao','acima',this)">⭐ Acima do Esperado</button>
+    <button class="filter-btn" data-filter="avaliacao" data-val="dentro" onclick="filterBy('avaliacao','dentro',this)">Dentro do Esperado</button>
+  </div>
+  <span class="toolbar-label" style="margin-left:8px">Nível</span>
+  <div class="filter-group" id="filter-nivel">
+    <button class="filter-btn active" data-filter="nivel" data-val="all" onclick="filterBy('nivel','all',this)">Todos</button>
+    <button class="filter-btn" data-filter="nivel" data-val="Jr" onclick="filterBy('nivel','Jr',this)">Jr</button>
+    <button class="filter-btn" data-filter="nivel" data-val="Pl" onclick="filterBy('nivel','Pl',this)">Pl</button>
+    <button class="filter-btn" data-filter="nivel" data-val="Sr" onclick="filterBy('nivel','Sr',this)">Sr</button>
+    <button class="filter-btn" data-filter="nivel" data-val="Staff" onclick="filterBy('nivel','Staff',this)">Staff</button>
+  </div>
+  <div class="search-wrap">
+    <input type="text" id="search-input" placeholder="Buscar dev..." oninput="doSearch(this.value)"/>
+  </div>
+  <div class="count-badge"><span id="count-num">13</span> devs</div>
+</div>
+
+<div class="dev-grid" id="dev-grid">
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!-- ARIEL -->
+<div class="dev-card" data-time="BPJPIF" data-avaliacao="dentro" data-nivel="Sr" data-nome="Ariel Rocha Nogueira">
+  <div class="card-header">
+    <div class="avatar">AR</div>
+    <div class="card-info">
+      <div class="card-name">Ariel Rocha Nogueira</div>
+      <div class="card-meta">
+        <span class="meta-tag cargo">Dev SR</span>
+        <span class="meta-tag time">BPJPIF</span>
+        <span style="color:var(--muted)">Gestor: Marcos Tulio</span>
+      </div>
+      <div class="avaliacao-badge badge-dentro">Dentro do Esperado</div>
+    </div>
+    <div class="score-block">
+      <div class="score-num" style="color:#60a5fa">3,44</div>
+      <div class="score-label">Média Final</div>
+    </div>
+  </div>
+  <div class="radar-wrap">
+    <div class="radar-row"><span class="radar-label">Atitude de Dono</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:65%;background:#6c63ff"></div></div><span class="radar-val">3,28</span></div>
+    <div class="radar-row"><span class="radar-label">Determinação</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:69%;background:#6c63ff"></div></div><span class="radar-val">3,47</span></div>
+    <div class="radar-row"><span class="radar-label">Disciplina</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:65%;background:#6c63ff"></div></div><span class="radar-val">3,26</span></div>
+    <div class="radar-row"><span class="radar-label">Disponibilidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:67%;background:#6c63ff"></div></div><span class="radar-val">3,34</span></div>
+    <div class="radar-row"><span class="radar-label">Franqueza</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:66%;background:#6c63ff"></div></div><span class="radar-val">3,32</span></div>
+    <div class="radar-row"><span class="radar-label">Humildade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:67%;background:#10b981"></div></div><span class="radar-val">3,35</span></div>
+    <div class="radar-row"><span class="radar-label">Simplicidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:67%;background:#6c63ff"></div></div><span class="radar-val">3,37</span></div>
+  </div>
+  <div class="hl-section">
+    <button class="hl-toggle" onclick="toggleHL(this)">
+      <span>✅ Highs &amp; 🔶 Lows</span><span class="toggle-icon">▼</span>
+    </button>
+    <div class="hl-content">
+      <div class="hl-group">
+        <div class="hl-group-title highs">✅ Highs</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Referência técnica e colaborativa</strong> — ponto focal do time para dúvidas, mentoria e orientação; postura acessível reconhecida por gestor e pares</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Comprometimento com entregas</strong> — papel de "guardião dos combinados", garantindo que acordos sejam aplicados na prática</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Execução em projetos críticos</strong> — participação central na construção da plataforma PIX do zero em 4 meses</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Disponibilidade e colaboração</strong> — alta disponibilidade mesmo sem convivência frequente; resolução ágil em momentos críticos</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Humildade</strong> — nota mais alta na avaliação (5,0 auto, 3,70 cross); prioriza o coletivo consistentemente</span></div>
+      </div>
+      <div class="hl-group">
+        <div class="hl-group-title lows">🔶 Lows / Oportunidades</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Visibilidade e protagonismo</strong> — atuação técnica de alto nível muitas vezes ocorreu "na sombra"; assumir protagonismo nas discussões e na tribo</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Visão do todo</strong> — nota mais baixa (2,65 média, <span style="color:#f59e0b">2,0 do gestor</span>): ampliar visão sistêmica do contexto Pix</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Assertividade na comunicação</strong> — mensagens por vezes interpretadas de forma dúbia; comunicação mais direta e estruturada por público</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Posicionamento e dizer não</strong> — desenvolver segurança para se posicionar com firmeza traz mais previsibilidade para o time</span></div>
+      </div>
+      <div class="gestor-quote">"Ariel demonstra elevado comprometimento com as entregas, mantendo foco constante na melhoria contínua dos processos do time. Atua como guardião dos combinados..." — Gestor</div>
+    </div>
+  </div>
+</div>
+
+<!-- ESLEY -->
+<div class="dev-card" data-time="PJPY" data-avaliacao="dentro" data-nivel="Sr" data-nome="Esley Candida Da Conceicao Sousa Alves">
+  <div class="card-header">
+    <div class="avatar">EA</div>
+    <div class="card-info">
+      <div class="card-name">Esley Alves</div>
+      <div class="card-meta">
+        <span class="meta-tag cargo">Dev SR</span>
+        <span class="meta-tag time">PJPY</span>
+        <span style="color:var(--muted)">Gestor: Marcos Tulio</span>
+      </div>
+      <div class="avaliacao-badge badge-dentro">Dentro do Esperado</div>
+    </div>
+    <div class="score-block">
+      <div class="score-num" style="color:#60a5fa">3,19</div>
+      <div class="score-label">Média Final</div>
+    </div>
+  </div>
+  <div class="radar-wrap">
+    <div class="radar-row"><span class="radar-label">Atitude de Dono</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:56%;background:#ef4444"></div></div><span class="radar-val">2,83</span></div>
+    <div class="radar-row"><span class="radar-label">Determinação</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:62%;background:#6c63ff"></div></div><span class="radar-val">3,11</span></div>
+    <div class="radar-row"><span class="radar-label">Disciplina</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:55%;background:#ef4444"></div></div><span class="radar-val">2,78</span></div>
+    <div class="radar-row"><span class="radar-label">Disponibilidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:65%;background:#6c63ff"></div></div><span class="radar-val">3,26</span></div>
+    <div class="radar-row"><span class="radar-label">Franqueza</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:62%;background:#6c63ff"></div></div><span class="radar-val">3,11</span></div>
+    <div class="radar-row"><span class="radar-label">Humildade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:64%;background:#6c63ff"></div></div><span class="radar-val">3,23</span></div>
+    <div class="radar-row"><span class="radar-label">Simplicidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:65%;background:#6c63ff"></div></div><span class="radar-val">3,27</span></div>
+  </div>
+  <div class="hl-section">
+    <button class="hl-toggle" onclick="toggleHL(this)">
+      <span>✅ Highs &amp; 🔶 Lows</span><span class="toggle-icon">▼</span>
+    </button>
+    <div class="hl-content">
+      <div class="hl-group">
+        <div class="hl-group-title highs">✅ Highs</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Alta disponibilidade e espírito colaborativo</strong> — destaque unânime; referência pela experiência acumulada e pelo conhecimento de stack</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Velocidade e assertividade nas entregas</strong> — execução rápida e eficaz, incluindo projetos de grande porte</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Conhecimento técnico profundo</strong> — domínio das stacks da empresa; instrui colegas e conduz projetos com fluidez</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Tranquilidade e adaptabilidade</strong> — postura calma e alta flexibilidade citadas como diferenciais</span></div>
+      </div>
+      <div class="hl-group">
+        <div class="hl-group-title lows">🔶 Lows / Oportunidades</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Atitude de Dono</strong> — nota mais baixa (2,83 média, <span style="color:#f59e0b">2,33 gestor</span>); "visão do todo" com <span style="color:#ef4444">2,0 gestor</span> — ponto de atenção para nível sênior</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Disciplina</strong> — 2,78 média (<span style="color:#f59e0b">2,33 gestor</span>); otimização de tempo e foco nos detalhes são os subpontos sinalizados</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Assertividade / Dizer não</strong> — "expressa opiniões quando contrárias" com <span style="color:#ef4444">2,0 gestor</span>; posicionamento mais firme esperado para a senioridade</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Gap autoavaliação vs. gestor</strong> — diferença de ~1 ponto (3,71 auto vs. 2,76 gestor): trabalhar calibração da autopercepção</span></div>
+      </div>
+      <div class="gestor-quote">"Demonstra alta disponibilidade para apoiar o time, mantendo postura colaborativa e comprometida com as entregas. Seu tempo de casa contribui para a estabilidade e continuidade dos processos..." — Gestor</div>
+    </div>
+  </div>
+</div>
+
+<!-- GABRIEL -->
+<div class="dev-card" data-time="BPJPIF" data-avaliacao="dentro" data-nivel="Sr" data-nome="Gabriel Dos Santos Carvalho">
+  <div class="card-header">
+    <div class="avatar">GC</div>
+    <div class="card-info">
+      <div class="card-name">Gabriel Carvalho</div>
+      <div class="card-meta">
+        <span class="meta-tag cargo">Dev SR</span>
+        <span class="meta-tag time">BPJPIF</span>
+        <span style="color:var(--muted)">Gestor: Marcos Tulio</span>
+      </div>
+      <div class="avaliacao-badge badge-dentro">Dentro do Esperado</div>
+    </div>
+    <div class="score-block">
+      <div class="score-num" style="color:#60a5fa">3,19</div>
+      <div class="score-label">Média Final</div>
+    </div>
+  </div>
+  <div class="radar-wrap">
+    <div class="radar-row"><span class="radar-label">Atitude de Dono</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:62%;background:#6c63ff"></div></div><span class="radar-val">3,10</span></div>
+    <div class="radar-row"><span class="radar-label">Determinação</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:62%;background:#6c63ff"></div></div><span class="radar-val">3,13</span></div>
+    <div class="radar-row"><span class="radar-label">Disciplina</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:59%;background:#f59e0b"></div></div><span class="radar-val">2,95</span></div>
+    <div class="radar-row"><span class="radar-label">Disponibilidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:63%;background:#6c63ff"></div></div><span class="radar-val">3,17</span></div>
+    <div class="radar-row"><span class="radar-label">Franqueza</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:66%;background:#10b981"></div></div><span class="radar-val">3,30</span></div>
+    <div class="radar-row"><span class="radar-label">Humildade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:63%;background:#6c63ff"></div></div><span class="radar-val">3,17</span></div>
+    <div class="radar-row"><span class="radar-label">Simplicidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:62%;background:#6c63ff"></div></div><span class="radar-val">3,13</span></div>
+  </div>
+  <div class="hl-section">
+    <button class="hl-toggle" onclick="toggleHL(this)">
+      <span>✅ Highs &amp; 🔶 Lows</span><span class="toggle-icon">▼</span>
+    </button>
+    <div class="hl-content">
+      <div class="hl-group">
+        <div class="hl-group-title highs">✅ Highs</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Comunicação e franqueza</strong> — nota mais alta da avaliação (3,60 gestor); se posiciona com sinceridade e contribui com questionamentos que agregam</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Análise holística</strong> — capacidade de trazer ângulos diferentes; pares reconhecem abordagem analítica e conexão entre ideias</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Receptividade a feedbacks</strong> — absorção positiva e rápida adaptação ao contexto; postura de aprendizado valorizada</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Colaboração</strong> — disponível e prontidão para apoiar demandas mesmo fora do cotidiano direto</span></div>
+      </div>
+      <div class="hl-group">
+        <div class="hl-group-title lows">🔶 Lows / Oportunidades</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Disciplina</strong> — nota mais baixa (2,95 média, <span style="color:#f59e0b">2,67 gestor</span>); "foco e pragmatismo com detalhes" como subponto mais fraco</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Objetividade e pragmatismo</strong> — gestor sinaliza: desenvolver maior objetividade e direcionar esforços para entrega de forma mais prática</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Compromisso com horários</strong> — autoavaliação levanta pontualidade em agendas como ponto de melhoria explícito</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Evolução para referência técnica</strong> — de sênior participativo para propositor de soluções mais estruturadas e protagonista técnico</span></div>
+      </div>
+      <div class="gestor-quote">"Gabriel, mesmo com pouco tempo de casa, demonstra entusiasmo e paixão pelo trabalho... Mostra disposição para aprender, absorve feedbacks de forma positiva e busca rapidamente se adaptar ao contexto." — Gestor</div>
+    </div>
+  </div>
+</div>
+
+<!-- GUSTAVO -->
+<div class="dev-card" data-time="PJPY" data-avaliacao="acima" data-nivel="Pl" data-nome="Gustavo Kumasawa">
+  <div class="card-header">
+    <div class="avatar" style="background:linear-gradient(135deg,#10b981,#059669)">GK</div>
+    <div class="card-info">
+      <div class="card-name">Gustavo Kumasawa</div>
+      <div class="card-meta">
+        <span class="meta-tag cargo">Dev PL</span>
+        <span class="meta-tag time">PJPY</span>
+        <span style="color:var(--muted)">Gestor: Maicon Ferreira</span>
+      </div>
+      <div class="avaliacao-badge badge-acima">⭐ Acima do Esperado</div>
+    </div>
+    <div class="score-block">
+      <div class="score-num" style="color:#10b981">3,76</div>
+      <div class="score-label">Média Final</div>
+    </div>
+  </div>
+  <div class="radar-wrap">
+    <div class="radar-row"><span class="radar-label">Atitude de Dono</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:75%;background:#10b981"></div></div><span class="radar-val">3,75</span></div>
+    <div class="radar-row"><span class="radar-label">Determinação</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:74%;background:#10b981"></div></div><span class="radar-val">3,70</span></div>
+    <div class="radar-row"><span class="radar-label">Disciplina</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:74%;background:#10b981"></div></div><span class="radar-val">3,69</span></div>
+    <div class="radar-row"><span class="radar-label">Disponibilidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:77%;background:#10b981"></div></div><span class="radar-val">3,86</span></div>
+    <div class="radar-row"><span class="radar-label">Franqueza</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:67%;background:#f59e0b"></div></div><span class="radar-val">3,38</span></div>
+    <div class="radar-row"><span class="radar-label">Humildade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:72%;background:#10b981"></div></div><span class="radar-val">3,60</span></div>
+    <div class="radar-row"><span class="radar-label">Simplicidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:68%;background:#6c63ff"></div></div><span class="radar-val">3,41</span></div>
+  </div>
+  <div class="hl-section">
+    <button class="hl-toggle" onclick="toggleHL(this)">
+      <span>✅ Highs &amp; 🔶 Lows</span><span class="toggle-icon">▼</span>
+    </button>
+    <div class="hl-content">
+      <div class="hl-group">
+        <div class="hl-group-title highs">✅ Highs</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Performance acima do nível pleno</strong> — todos os valores acima de 3,6; cross-group médias acima de 4,0 em Humildade e Disponibilidade</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Qualidade técnica mobile</strong> — forte domínio técnico, consistência na execução; entrega do QR-Code sem chave Pix como destaque do gestor</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Disponibilidade (3,86)</strong> — nota mais alta; disponibiliza tempo para equipe, pares e clientes; referência de acessibilidade</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Comprometimento e colaboração</strong> — cumpre o que combina, lida bem com prazos; compartilhamento de conhecimento com o time</span></div>
+      </div>
+      <div class="hl-group">
+        <div class="hl-group-title lows">🔶 Lows / Oportunidades</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Franqueza (3,38)</strong> — nota mais baixa; "expressa opiniões quando contrárias" (3,38) — dado o nível de entrega, ampliar o posicionamento vocal é o próximo passo natural</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Simplicidade</strong> — gestor deu 3,0: simplificar abordagens e ir mais direto ao ponto</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Visibilidade arquitetural</strong> — gestor indica: ampliar presença em decisões de arquitetura e soluções de médio-longo prazo</span></div>
+      </div>
+      <div class="gestor-quote">"Kuma é um excelente desenvolvedor mobile, com forte domínio técnico e grande senso de responsabilidade sobre as entregas... Sua dedicação e comprometimento geram impacto positivo nas entregas e reforçam a confiança do time." — Gestor</div>
+    </div>
+  </div>
+</div>
+
+<!-- JOAO VICTOR -->
+<div class="dev-card" data-time="PJPY" data-avaliacao="dentro" data-nivel="Pl" data-nome="Joao Victor De Deus Matos">
+  <div class="card-header">
+    <div class="avatar">JM</div>
+    <div class="card-info">
+      <div class="card-name">João Victor Matos</div>
+      <div class="card-meta">
+        <span class="meta-tag cargo">Dev PL</span>
+        <span class="meta-tag time">PJPY</span>
+        <span style="color:var(--muted)">Gestor: Maicon Ferreira</span>
+      </div>
+      <div class="avaliacao-badge badge-dentro">Dentro do Esperado</div>
+    </div>
+    <div class="score-block">
+      <div class="score-num" style="color:#60a5fa">3,64</div>
+      <div class="score-label">Média Final</div>
+    </div>
+  </div>
+  <div class="radar-wrap">
+    <div class="radar-row"><span class="radar-label">Atitude de Dono</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:69%;background:#6c63ff"></div></div><span class="radar-val">3,45</span></div>
+    <div class="radar-row"><span class="radar-label">Determinação</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:70%;background:#10b981"></div></div><span class="radar-val">3,51</span></div>
+    <div class="radar-row"><span class="radar-label">Disciplina</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:69%;background:#6c63ff"></div></div><span class="radar-val">3,47</span></div>
+    <div class="radar-row"><span class="radar-label">Disponibilidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:70%;background:#10b981"></div></div><span class="radar-val">3,51</span></div>
+    <div class="radar-row"><span class="radar-label">Franqueza</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:69%;background:#6c63ff"></div></div><span class="radar-val">3,46</span></div>
+    <div class="radar-row"><span class="radar-label">Humildade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:70%;background:#6c63ff"></div></div><span class="radar-val">3,50</span></div>
+    <div class="radar-row"><span class="radar-label">Simplicidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:68%;background:#6c63ff"></div></div><span class="radar-val">3,43</span></div>
+  </div>
+  <div class="hl-section">
+    <button class="hl-toggle" onclick="toggleHL(this)">
+      <span>✅ Highs &amp; 🔶 Lows</span><span class="toggle-icon">▼</span>
+    </button>
+    <div class="hl-content">
+      <div class="hl-group">
+        <div class="hl-group-title highs">✅ Highs</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Domínio técnico e execução autônoma</strong> — entrega tarefas complexas com autonomia e dentro dos prazos; foco em performance e fluidez da UX</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Disponibilidade e comprometimento</strong> — cross-group (4,02): alto grau de disponibilidade; atuação exemplar em incidentes</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Disciplina e foco</strong> — cumpre acordos, tem foco e pragmatismo; nota 5,0 na autoavaliação validada pelo cross-group (3,94)</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Trabalho em equipe e humildade</strong> — prioriza o "nós", considera opiniões diferentes; postura calma favorece ambiente saudável</span></div>
+      </div>
+      <div class="hl-group">
+        <div class="hl-group-title lows">🔶 Lows / Oportunidades</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Visibilidade e voz ativa</strong> — oportunidade mais citada: participar mais nas discussões, compartilhar contextos com mais proatividade</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Observabilidade e visão sistêmica</strong> — gestor indica: métricas, monitoramento e performance; fortalecer visão além do código</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Comunicação técnica com stakeholders</strong> — desenvolver tradução de temas técnicos para não-técnicos; ampliar atuação cross-team</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Responsividade a mensagens</strong> — foco excessivo pode impactar percepção de disponibilidade; manter atenção às notificações</span></div>
+      </div>
+      <div class="gestor-quote">"João demonstra sólido domínio técnico e profundo conhecimento do ecossistema PicPay. Além disso, possui excelente capacidade de execução, entregando tarefas complexas com autonomia e dentro dos prazos acordados." — Gestor</div>
+    </div>
+  </div>
+</div>
+
+<!-- LUIS -->
+<div class="dev-card" data-time="BPJPIF" data-avaliacao="dentro" data-nivel="Sr" data-nome="Luis Paulo Toniette Franca">
+  <div class="card-header">
+    <div class="avatar">LF</div>
+    <div class="card-info">
+      <div class="card-name">Luis Paulo Franca</div>
+      <div class="card-meta">
+        <span class="meta-tag cargo">Dev SR</span>
+        <span class="meta-tag time">BPJPIF</span>
+        <span style="color:var(--muted)">Gestor: Marcos Tulio</span>
+      </div>
+      <div class="avaliacao-badge badge-dentro">Dentro do Esperado</div>
+    </div>
+    <div class="score-block">
+      <div class="score-num" style="color:#60a5fa">3,25</div>
+      <div class="score-label">Média Final</div>
+    </div>
+  </div>
+  <div class="radar-wrap">
+    <div class="radar-row"><span class="radar-label">Atitude de Dono</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:61%;background:#6c63ff"></div></div><span class="radar-val">3,06</span></div>
+    <div class="radar-row"><span class="radar-label">Determinação</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:57%;background:#f59e0b"></div></div><span class="radar-val">2,84</span></div>
+    <div class="radar-row"><span class="radar-label">Disciplina</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:47%;background:#ef4444"></div></div><span class="radar-val">2,38</span></div>
+    <div class="radar-row"><span class="radar-label">Disponibilidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:68%;background:#10b981"></div></div><span class="radar-val">3,39</span></div>
+    <div class="radar-row"><span class="radar-label">Franqueza</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:64%;background:#6c63ff"></div></div><span class="radar-val">3,21</span></div>
+    <div class="radar-row"><span class="radar-label">Humildade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:70%;background:#10b981"></div></div><span class="radar-val">3,53</span></div>
+    <div class="radar-row"><span class="radar-label">Simplicidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:52%;background:#ef4444"></div></div><span class="radar-val">2,63</span></div>
+  </div>
+  <div class="hl-section">
+    <button class="hl-toggle" onclick="toggleHL(this)">
+      <span>✅ Highs &amp; 🔶 Lows</span><span class="toggle-icon">▼</span>
+    </button>
+    <div class="hl-content">
+      <div class="hl-group">
+        <div class="hl-group-title highs">✅ Highs</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Conhecimento técnico e comunicação</strong> — articulação clara, raciocínio estruturado; referência na tribo para Kafka, infra e stack BPJPIF</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Disponibilidade para incidentes (3,39)</strong> — prontidão na resposta; sempre aciona as squads certas com clareza e rapidez</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Humildade (3,53)</strong> — nota mais alta; receptivo, não impõe opiniões, facilita colaboração</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Documentação e compartilhamento</strong> — cria documentações, fomenta o conhecimento do time; instrução técnica para outros devs</span></div>
+      </div>
+      <div class="hl-group">
+        <div class="hl-group-title lows">🔶 Lows / Oportunidades</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Disciplina (2,38 — mais crítico do grupo)</strong> — <span style="color:#ef4444">1,33 gestor</span>; "cumpre acordos" (2,27) e "otimiza tempo" (1,95) são os subpontos mais urgentes</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Simplicidade (2,63)</strong> — <span style="color:#ef4444">1,67 gestor</span>; "foco no que é importante" com <span style="color:#ef4444">1,0 gestor</span>: reduzir complexidade e ser mais direto</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Transparência no acompanhamento</strong> — gestor: comunicar avanços e desafios de forma mais assertiva; assertividade na escolha de soluções mais simples</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Gap autoavaliação vs. gestor</strong> — maior gap do grupo: 3,0 (auto) vs. <span style="color:#f59e0b">2,29 gestor</span>; abrir espaço genuíno para o feedback</span></div>
+      </div>
+      <div class="gestor-quote">"Luiz possui excelente capacidade de comunicação, articulando ideias de maneira clara e embasada em forte conhecimento técnico... Sua habilidade de argumentação e troca de conhecimento fortalece o alinhamento e a colaboração." — Gestor</div>
+    </div>
+  </div>
+</div>
+
+<!-- MONALISA -->
+<div class="dev-card" data-time="BPJPIF" data-avaliacao="dentro" data-nivel="Pl" data-nome="Maria Monalisa De Alencar Rodrigues">
+  <div class="card-header">
+    <div class="avatar">MA</div>
+    <div class="card-info">
+      <div class="card-name">Maria Monalisa Alencar</div>
+      <div class="card-meta">
+        <span class="meta-tag cargo">Dev PL</span>
+        <span class="meta-tag time">BPJPIF · PJPY</span>
+        <span style="color:var(--muted)">Gestor: Marcos Tulio</span>
+      </div>
+      <div class="avaliacao-badge badge-dentro">Dentro do Esperado</div>
+    </div>
+    <div class="score-block">
+      <div class="score-num" style="color:#60a5fa">3,53</div>
+      <div class="score-label">Média Final</div>
+    </div>
+  </div>
+  <div class="radar-wrap">
+    <div class="radar-row"><span class="radar-label">Atitude de Dono</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:72%;background:#10b981"></div></div><span class="radar-val">3,59</span></div>
+    <div class="radar-row"><span class="radar-label">Determinação</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:67%;background:#6c63ff"></div></div><span class="radar-val">3,38</span></div>
+    <div class="radar-row"><span class="radar-label">Disciplina</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:66%;background:#6c63ff"></div></div><span class="radar-val">3,30</span></div>
+    <div class="radar-row"><span class="radar-label">Disponibilidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:74%;background:#10b981"></div></div><span class="radar-val">3,71</span></div>
+    <div class="radar-row"><span class="radar-label">Franqueza</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:67%;background:#6c63ff"></div></div><span class="radar-val">3,38</span></div>
+    <div class="radar-row"><span class="radar-label">Humildade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:68%;background:#6c63ff"></div></div><span class="radar-val">3,40</span></div>
+    <div class="radar-row"><span class="radar-label">Simplicidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:65%;background:#6c63ff"></div></div><span class="radar-val">3,25</span></div>
+  </div>
+  <div class="hl-section">
+    <button class="hl-toggle" onclick="toggleHL(this)">
+      <span>✅ Highs &amp; 🔶 Lows</span><span class="toggle-icon">▼</span>
+    </button>
+    <div class="hl-content">
+      <div class="hl-group">
+        <div class="hl-group-title highs">✅ Highs</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Alta disponibilidade (3,71)</strong> — nota mais alta; sempre presente para o time e para novos desafios; absorve demandas complexas com disposição</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Referência técnica pós-promoção</strong> — gestor reconhece consolidação como referência sênior após promoção recente; domínio técnico em cenários complexos</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Atitude de Dono (3,59)</strong> — "compromete-se com resultado" (3,92 média, <span style="color:#10b981">4,0 gestor</span>); atuação ativa no incidente do biz-withdraw</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Franqueza e entusiasmo</strong> — postura direta e construtiva nas discussões; energia reconhecida pelo time</span></div>
+      </div>
+      <div class="hl-group">
+        <div class="hl-group-title lows">🔶 Lows / Oportunidades</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Busca de soluções alternativas</strong> — nota mais baixa (<span style="color:#f59e0b">2,0 gestor</span>): desenvolver maior repertório de abordagens alternativas</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Simplicidade</strong> — menor nota do gestor (3,0); "foco no que é importante" (3,19) é o subponto a desenvolver</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Autoconfiança na nova senioridade</strong> — recém promovida: consolidar protagonismo técnico com a segurança que o nível exige</span></div>
+      </div>
+      <div class="gestor-quote">"Monalisa demonstra elevado comprometimento e dedicação... Após sua recente promoção ao nível sênior, tem se consolidado como referência e apoio para o time, contribuindo de forma consistente para melhores resultados." — Gestor</div>
+    </div>
+  </div>
+</div>
+
+<!-- MATHEUS -->
+<div class="dev-card" data-time="PJPY" data-avaliacao="dentro" data-nivel="Pl" data-nome="Matheus Brito Cavalher">
+  <div class="card-header">
+    <div class="avatar">MC</div>
+    <div class="card-info">
+      <div class="card-name">Matheus Cavalher</div>
+      <div class="card-meta">
+        <span class="meta-tag cargo">Dev PL</span>
+        <span class="meta-tag time">PJPY</span>
+        <span style="color:var(--muted)">Gestor: Marcos Tulio</span>
+      </div>
+      <div class="avaliacao-badge badge-dentro">Dentro do Esperado</div>
+    </div>
+    <div class="score-block">
+      <div class="score-num" style="color:#60a5fa">3,10</div>
+      <div class="score-label">Média Final</div>
+    </div>
+  </div>
+  <div class="radar-wrap">
+    <div class="radar-row"><span class="radar-label">Atitude de Dono</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:60%;background:#f59e0b"></div></div><span class="radar-val">2,99</span></div>
+    <div class="radar-row"><span class="radar-label">Determinação</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:56%;background:#f59e0b"></div></div><span class="radar-val">2,83</span></div>
+    <div class="radar-row"><span class="radar-label">Disciplina</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:60%;background:#6c63ff"></div></div><span class="radar-val">3,00</span></div>
+    <div class="radar-row"><span class="radar-label">Disponibilidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:64%;background:#6c63ff"></div></div><span class="radar-val">3,21</span></div>
+    <div class="radar-row"><span class="radar-label">Franqueza</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:65%;background:#10b981"></div></div><span class="radar-val">3,25</span></div>
+    <div class="radar-row"><span class="radar-label">Humildade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:64%;background:#6c63ff"></div></div><span class="radar-val">3,21</span></div>
+    <div class="radar-row"><span class="radar-label">Simplicidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:60%;background:#6c63ff"></div></div><span class="radar-val">3,03</span></div>
+  </div>
+  <div class="hl-section">
+    <button class="hl-toggle" onclick="toggleHL(this)">
+      <span>✅ Highs &amp; 🔶 Lows</span><span class="toggle-icon">▼</span>
+    </button>
+    <div class="hl-content">
+      <div class="hl-group">
+        <div class="hl-group-title highs">✅ Highs</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Organização e documentação</strong> — ponto mais citado por todos; referência do time como "guardião da bíblia de Pix"; aptidão organizacional reconhecida unanimemente</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Vontade de aprender</strong> — chegou questionando bastante; postura de aprendizado contínuo e busca por melhores práticas valorizada</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Consistência e confiabilidade</strong> — entrega o que é esperado de forma competente; membro confiável que contribui para estabilidade do time</span></div>
+      </div>
+      <div class="hl-group">
+        <div class="hl-group-title lows">🔶 Lows / Oportunidades</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Atitude de Dono (2,99)</strong> — "visão do todo" como subponto mais fraco (2,71): ampliar perspectiva além das próprias tarefas é o principal passo para o próximo nível</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Determinação (2,83)</strong> — "senso de urgência" (2,75) e "busca de soluções alternativas" (2,75): protagonismo na resolução de problemas precisa crescer</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Protagonismo e senso de propriedade</strong> — evoluir de executor confiável para uma voz mais ativa; escalar desafios com mais urgência quando há bloqueios</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Aprofundamento técnico</strong> — investir em domínio da stack e se aventurar em desafios de maior complexidade para ampliar capacidade de contribuição</span></div>
+      </div>
+      <div class="gestor-quote">"Matheus demonstra forte capacidade de organização e atenção aos detalhes em processos do time. Sua habilidade para criar e manter documentações claras facilita o alinhamento entre membros..." — Gestor</div>
+    </div>
+  </div>
+</div>
+
+<!-- PABLO -->
+<div class="dev-card" data-time="PJPY" data-avaliacao="dentro" data-nivel="Pl" data-nome="Pablo Henrique Silva Ribeiro">
+  <div class="card-header">
+    <div class="avatar">PR</div>
+    <div class="card-info">
+      <div class="card-name">Pablo Ribeiro</div>
+      <div class="card-meta">
+        <span class="meta-tag cargo">Dev PL</span>
+        <span class="meta-tag time">PJPY</span>
+        <span style="color:var(--muted)">Gestor: Marcos Tulio</span>
+      </div>
+      <div class="avaliacao-badge badge-dentro">Dentro do Esperado</div>
+    </div>
+    <div class="score-block">
+      <div class="score-num" style="color:#60a5fa">3,59</div>
+      <div class="score-label">Média Final</div>
+    </div>
+  </div>
+  <div class="radar-wrap">
+    <div class="radar-row"><span class="radar-label">Atitude de Dono</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:76%;background:#10b981"></div></div><span class="radar-val">3,82</span></div>
+    <div class="radar-row"><span class="radar-label">Determinação</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:76%;background:#10b981"></div></div><span class="radar-val">3,80</span></div>
+    <div class="radar-row"><span class="radar-label">Disciplina</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:68%;background:#6c63ff"></div></div><span class="radar-val">3,38</span></div>
+    <div class="radar-row"><span class="radar-label">Disponibilidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:78%;background:#10b981"></div></div><span class="radar-val">3,91</span></div>
+    <div class="radar-row"><span class="radar-label">Franqueza</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:63%;background:#f59e0b"></div></div><span class="radar-val">3,18</span></div>
+    <div class="radar-row"><span class="radar-label">Humildade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:64%;background:#6c63ff"></div></div><span class="radar-val">3,24</span></div>
+    <div class="radar-row"><span class="radar-label">Simplicidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:67%;background:#6c63ff"></div></div><span class="radar-val">3,35</span></div>
+  </div>
+  <div class="hl-section">
+    <button class="hl-toggle" onclick="toggleHL(this)">
+      <span>✅ Highs &amp; 🔶 Lows</span><span class="toggle-icon">▼</span>
+    </button>
+    <div class="hl-content">
+      <div class="hl-group">
+        <div class="hl-group-title highs">✅ Highs</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Determinação e Atitude de Dono</strong> — notas mais altas (3,80 e 3,82); assume responsabilidade por resolver incidentes com rapidez; busca implementar melhorias</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Performance acima do nível pleno</strong> — múltiplos avaliadores: já entrega em nível sênior; postura e capacidade técnica acima do cargo</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Conhecimento do ecossistema Pix</strong> — referência para suporte; domínio de fluxos e regras de negócio aplicados com precisão em situações críticas</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Disponibilidade (3,91)</strong> — nota mais alta; prontamente disponível para incidentes e chamados com alta velocidade de resposta</span></div>
+      </div>
+      <div class="hl-group">
+        <div class="hl-group-title lows">🔶 Lows / Oportunidades</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Franqueza (3,18)</strong> — nota mais baixa; "expressa opiniões quando contrárias" (3,10): se posicionar com mais assertividade nas discussões é o próximo salto</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Humildade (3,24)</strong> — "não é arrogante" (3,17): manter equilíbrio entre confiança no próprio conhecimento e abertura genuína para perspectivas diferentes</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Visibilidade proporcional à entrega</strong> — trabalho de qualidade precisa de mais exposição; comunicar realizações e se voluntariar para desafios mais visíveis</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Visão além do suporte</strong> — excelência no modo bombeiro; expandir para iniciativas de produto e arquitetura ampliam impacto para além da resolução reativa</span></div>
+      </div>
+      <div class="gestor-quote">"Pablo demonstra forte Determinação e Atitude de Dono, assumindo responsabilidade por resolver incidentes com rapidez e buscando sempre implementar melhorias... Apesar de estar como pleno, apresenta desempenho técnico e comportamental superior." — Gestor</div>
+    </div>
+  </div>
+</div>
+
+<!-- PEDRO -->
+<div class="dev-card" data-time="BPJPIF" data-avaliacao="dentro" data-nivel="Jr" data-nome="Pedro Gabriel Silva De Lima">
+  <div class="card-header">
+    <div class="avatar">PG</div>
+    <div class="card-info">
+      <div class="card-name">Pedro Gabriel</div>
+      <div class="card-meta">
+        <span class="meta-tag cargo">Dev Jr</span>
+        <span class="meta-tag time">BPJPIF</span>
+        <span style="color:var(--muted)">Gestor: Marcos Tulio</span>
+      </div>
+      <div class="avaliacao-badge badge-dentro">Dentro do Esperado</div>
+    </div>
+    <div class="score-block">
+      <div class="score-num" style="color:#60a5fa">3,32</div>
+      <div class="score-label">Média Final</div>
+    </div>
+  </div>
+  <div class="radar-wrap">
+    <div class="radar-row"><span class="radar-label">Atitude de Dono</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:68%;background:#6c63ff"></div></div><span class="radar-val">3,40</span></div>
+    <div class="radar-row"><span class="radar-label">Determinação</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:70%;background:#10b981"></div></div><span class="radar-val">3,50</span></div>
+    <div class="radar-row"><span class="radar-label">Disciplina</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:65%;background:#6c63ff"></div></div><span class="radar-val">3,25</span></div>
+    <div class="radar-row"><span class="radar-label">Disponibilidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:66%;background:#6c63ff"></div></div><span class="radar-val">3,33</span></div>
+    <div class="radar-row"><span class="radar-label">Franqueza</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:59%;background:#ef4444"></div></div><span class="radar-val">2,97</span></div>
+    <div class="radar-row"><span class="radar-label">Humildade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:70%;background:#10b981"></div></div><span class="radar-val">3,50</span></div>
+    <div class="radar-row"><span class="radar-label">Simplicidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:65%;background:#6c63ff"></div></div><span class="radar-val">3,27</span></div>
+  </div>
+  <div class="hl-section">
+    <button class="hl-toggle" onclick="toggleHL(this)">
+      <span>✅ Highs &amp; 🔶 Lows</span><span class="toggle-icon">▼</span>
+    </button>
+    <div class="hl-content">
+      <div class="hl-group">
+        <div class="hl-group-title highs">✅ Highs</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Entusiasmo, paixão e dedicação</strong> — energia, vigor diário e busca constante por aprimoramento; surpreende positivamente para o nível júnior</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Aprendizado acelerado</strong> — absorve feedbacks com rapidez; cresce de forma consistente e perceptível; abertura genuína para aprender com o time</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Qualidade técnica excepcional</strong> — cross-group: demandas complexas repassadas com tranquilidade pela excelência na execução; conhecimento excepcional para o cargo</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Humildade (3,50)</strong> — nota mais alta; postura colaborativa, respeitosa e aberta nas interações de par; prioriza o coletivo</span></div>
+      </div>
+      <div class="hl-group">
+        <div class="hl-group-title lows">🔶 Lows / Oportunidades</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Franqueza (2,97 — mais baixa)</strong> — <span style="color:#f59e0b">2,33 gestor</span>; "expressa opiniões quando contrárias" (2,50): desenvolver coragem de se posicionar com mais segurança é o principal gap para o próximo nível</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Visão do todo (2,90)</strong> — ampliar perspectiva além da tarefa imediata; entender o impacto do trabalho no produto e na estratégia</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Comunicação mais assertiva</strong> — apontado por autoavaliação, gestor e cross-group: tornar a comunicação mais clara, objetiva e proativa</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Profundidade em cloud e padrões</strong> — pares identificam gaps em AWS, padrões de projeto e arquitetura; grande potencial de evolução com o direcionamento correto</span></div>
+      </div>
+      <div class="gestor-quote">"Pedro demonstra Atitude de Dono e forte entusiasmo pelo trabalho, atuando com dedicação e obstinação para alcançar os melhores resultados... Mantém disciplina e determinação em suas entregas... Sua energia e engajamento inspiram colegas." — Gestor</div>
+    </div>
+  </div>
+</div>
+
+<!-- SIDNEY -->
+<div class="dev-card" data-time="BPJPIF" data-avaliacao="dentro" data-nivel="Sr" data-nome="Sidney Da Silva Costa">
+  <div class="card-header">
+    <div class="avatar">SC</div>
+    <div class="card-info">
+      <div class="card-name">Sidney Costa</div>
+      <div class="card-meta">
+        <span class="meta-tag cargo">Dev SR</span>
+        <span class="meta-tag time">BPJPIF</span>
+        <span style="color:var(--muted)">Gestor: Marcos Tulio</span>
+      </div>
+      <div class="avaliacao-badge badge-dentro">Dentro do Esperado</div>
+    </div>
+    <div class="score-block">
+      <div class="score-num" style="color:#60a5fa">3,18</div>
+      <div class="score-label">Média Final</div>
+    </div>
+  </div>
+  <div class="radar-wrap">
+    <div class="radar-row"><span class="radar-label">Atitude de Dono</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:62%;background:#f59e0b"></div></div><span class="radar-val">3,11</span></div>
+    <div class="radar-row"><span class="radar-label">Determinação</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:66%;background:#6c63ff"></div></div><span class="radar-val">3,31</span></div>
+    <div class="radar-row"><span class="radar-label">Disciplina</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:57%;background:#f59e0b"></div></div><span class="radar-val">2,89</span></div>
+    <div class="radar-row"><span class="radar-label">Disponibilidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:66%;background:#6c63ff"></div></div><span class="radar-val">3,31</span></div>
+    <div class="radar-row"><span class="radar-label">Franqueza</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:63%;background:#6c63ff"></div></div><span class="radar-val">3,17</span></div>
+    <div class="radar-row"><span class="radar-label">Humildade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:68%;background:#10b981"></div></div><span class="radar-val">3,42</span></div>
+    <div class="radar-row"><span class="radar-label">Simplicidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:61%;background:#6c63ff"></div></div><span class="radar-val">3,08</span></div>
+  </div>
+  <div class="hl-section">
+    <button class="hl-toggle" onclick="toggleHL(this)">
+      <span>✅ Highs &amp; 🔶 Lows</span><span class="toggle-icon">▼</span>
+    </button>
+    <div class="hl-content">
+      <div class="hl-group">
+        <div class="hl-group-title highs">✅ Highs</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Maturidade, organização e didática</strong> — gestor destaca como diferenciais: profissional maduro e didático que contribui para o desenvolvimento do time</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Disponibilidade e determinação</strong> — sempre disponível e receptivo; espírito de parceria e determinação nas tarefas reconhecidos pelos pares</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Evolução rápida</strong> — com apenas 5 meses na empresa, demonstra comprometimento e adaptação mesmo num contexto atípico de sobrecarga</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Humildade (3,42)</strong> — nota mais alta; não impõe opiniões, receptivo, prioriza o coletivo</span></div>
+      </div>
+      <div class="hl-group">
+        <div class="hl-group-title lows">🔶 Lows / Oportunidades</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Atitude de Dono (3,11 média, 2,67 gestor)</strong> — "visão do todo" (2,50): conectar entregas ao contexto estratégico é fundamental para um sênior</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Disciplina (2,89 média, 2,67 gestor)</strong> — "cumpre acordos" (2,66): senso de urgência e comunicação assertiva sobre prazos são a principal oportunidade segundo o gestor</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Liderança ativa e visibilidade</strong> — pares sugerem criar oportunidades de se posicionar como voz ativa além da própria squad</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Posicionamento com autoconfiança</strong> — fortalecer segurança nas decisões e ações; sustentar posicionamentos de forma alinhada à Atitude de Dono esperada para a senioridade</span></div>
+      </div>
+      <div class="gestor-quote">"Sidney é um profissional maduro, organizado e didático, qualidades que contribuem significativamente para o desenvolvimento do time... Mesmo com pouco tempo na empresa, demonstra comprometimento e adaptação." — Gestor</div>
+    </div>
+  </div>
+</div>
+
+<!-- KAUAN -->
+<div class="dev-card" data-time="BPJPIF" data-avaliacao="dentro" data-nivel="Staff" data-nome="Kauan Sousa Leandro Rodrigues">
+  <div class="card-header">
+    <div class="avatar">KR</div>
+    <div class="card-info">
+      <div class="card-name">Kauan Sousa Rodrigues</div>
+      <div class="card-meta">
+        <span class="meta-tag cargo">Especialista Eng. I</span>
+        <span class="meta-tag time">BPJPIF</span>
+        <span style="color:var(--muted)">Gestor: Felipe Dextro</span>
+      </div>
+      <div class="avaliacao-badge badge-dentro">Dentro do Esperado</div>
+    </div>
+    <div class="score-block">
+      <div class="score-num" style="color:#60a5fa">3,21</div>
+      <div class="score-label">Média Final</div>
+    </div>
+  </div>
+  <div class="radar-wrap">
+    <div class="radar-row"><span class="radar-label">Atitude de Dono</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:66%;background:#10b981"></div></div><span class="radar-val">3,31</span></div>
+    <div class="radar-row"><span class="radar-label">Determinação</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:63%;background:#6c63ff"></div></div><span class="radar-val">3,14</span></div>
+    <div class="radar-row"><span class="radar-label">Disciplina</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:60%;background:#f59e0b"></div></div><span class="radar-val">3,01</span></div>
+    <div class="radar-row"><span class="radar-label">Disponibilidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:63%;background:#6c63ff"></div></div><span class="radar-val">3,15</span></div>
+    <div class="radar-row"><span class="radar-label">Franqueza</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:63%;background:#6c63ff"></div></div><span class="radar-val">3,12</span></div>
+    <div class="radar-row"><span class="radar-label">Humildade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:66%;background:#10b981"></div></div><span class="radar-val">3,31</span></div>
+    <div class="radar-row"><span class="radar-label">Simplicidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:63%;background:#6c63ff"></div></div><span class="radar-val">3,14</span></div>
+  </div>
+  <div class="hl-section">
+    <button class="hl-toggle" onclick="toggleHL(this)">
+      <span>✅ Highs &amp; 🔶 Lows</span><span class="toggle-icon">▼</span>
+    </button>
+    <div class="hl-content">
+      <div class="hl-group">
+        <div class="hl-group-title highs">✅ Highs</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Domínio técnico e visão de negócio</strong> — destaque unânime do cross-group: conecta necessidades técnicas com objetivos do negócio, tomando decisões mais assertivas e antecipando impactos; referência técnica confiável para discussões complexas</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Adaptabilidade e desenrolamento</strong> — gestor destaca: consegue transitar bem entre diferentes contextos, times e temas técnicos; entrou no projeto PIX na IF com contexto em andamento e rapidamente adquiriu domínio do domínio</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Proatividade e iniciativas cross-time</strong> — criação da lib de testes com Testcontainers para PHP citada como exemplo concreto: identificou uma dor real, criou a solução e ajudou múltiplos times; referência em testes de carga</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Atitude de Dono (3,31)</strong> — nota mais alta da avaliação; "compromete-se com resultado e sucesso do time" com <span style="color:#10b981">4,0 do gestor</span>; 9box: Performance Sólida</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Humildade e colaboração</strong> — reconhecido como extremamente acessível; sempre disposto a apoiar; postura humilde nas interações com o time dev; prioriza o coletivo (3,67 cross-group)</span></div>
+      </div>
+      <div class="hl-group">
+        <div class="hl-group-title lows">🔶 Lows / Oportunidades</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Protagonismo como referência técnica</strong> — gestor e cross-group alinham: ampliar atuação como referência arquitetural clara para o time; atuar mais ativamente em fóruns estratégicos e decisões de médio-longo prazo; tornar-se defensor de qualidade, escalabilidade e arquitetura</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Disciplina (3,01 — mais baixa)</strong> — "foco e pragmatismo com detalhes" com 2,84 cross-group (menor subponto da avaliação): aprofundar atenção nos detalhes de execução e estruturação das iniciativas</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Documentação e ownership das iniciativas</strong> — cross-group aponta: iniciativas como a lib de Testcontainers poderiam ganhar mais força com documentação mais completa, apresentações e acompanhamento ativo como owner para garantir adoção contínua pelos times</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Visão do todo e impacto cross-produto</strong> — pares sugerem ampliar compreensão do ecossistema além do contexto direto; aproximação com squads como Wallet para fortalecer sinergias; integrar visão técnica com impacto no negócio de forma mais estratégica</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Mentoria e cadência de feedbacks</strong> — autoavaliação reconhece: estruturar melhor a troca de feedbacks com os devs, criando cadência mais definida e frequente; ampliar atuação como mentor técnico ativo para engenheiros menos experientes</span></div>
+      </div>
+      <div class="gestor-quote">"Demonstra alta disponibilidade e comprometimento com o time, sendo frequentemente acionado para apoiar discussões técnicas, destravar impedimentos e apoiar colegas em momentos críticos. Possui bom domínio técnico, com capacidade de compreender rapidamente problemas complexos e propor soluções pragmáticas e eficientes." — Gestor</div>
+    </div>
+  </div>
+</div>
+
+<!-- THIAGO FIRSEN -->
+<div class="dev-card" data-time="PJPY" data-avaliacao="acima" data-nivel="Jr" data-nome="Thiago Firsen Bernardino">
+  <div class="card-header">
+    <div class="avatar" style="background:linear-gradient(135deg,#10b981,#059669)">TF</div>
+    <div class="card-info">
+      <div class="card-name">Thiago Firsen Bernardino</div>
+      <div class="card-meta">
+        <span class="meta-tag cargo">Dev Jr</span>
+        <span class="meta-tag time">PJPY</span>
+        <span style="color:var(--muted)">Gestor: Maicon Ferreira</span>
+      </div>
+      <div class="avaliacao-badge badge-acima">⭐ Acima do Esperado</div>
+    </div>
+    <div class="score-block">
+      <div class="score-num" style="color:#10b981">4,03</div>
+      <div class="score-label">Média Final</div>
+    </div>
+  </div>
+  <div class="radar-wrap">
+    <div class="radar-row"><span class="radar-label">Atitude de Dono</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:78%;background:#10b981"></div></div><span class="radar-val">3,92</span></div>
+    <div class="radar-row"><span class="radar-label">Determinação</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:78%;background:#10b981"></div></div><span class="radar-val">3,90</span></div>
+    <div class="radar-row"><span class="radar-label">Disciplina</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:80%;background:#10b981"></div></div><span class="radar-val">4,01</span></div>
+    <div class="radar-row"><span class="radar-label">Disponibilidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:79%;background:#10b981"></div></div><span class="radar-val">3,97</span></div>
+    <div class="radar-row"><span class="radar-label">Franqueza</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:76%;background:#10b981"></div></div><span class="radar-val">3,80</span></div>
+    <div class="radar-row"><span class="radar-label">Humildade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:76%;background:#10b981"></div></div><span class="radar-val">3,80</span></div>
+    <div class="radar-row"><span class="radar-label">Simplicidade</span><div class="radar-bar-bg"><div class="radar-bar-fill" style="width:72%;background:#6c63ff"></div></div><span class="radar-val">3,61</span></div>
+  </div>
+  <div class="hl-section">
+    <button class="hl-toggle" onclick="toggleHL(this)">
+      <span>✅ Highs &amp; 🔶 Lows</span><span class="toggle-icon">▼</span>
+    </button>
+    <div class="hl-content">
+      <div class="hl-group">
+        <div class="hl-group-title highs">✅ Highs</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Performance muito acima da senioridade</strong> — consenso absoluto: múltiplos avaliadores afirmam que deveria ser sênior; maturidade e qualidade incompatíveis com o cargo júnior</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Comprometimento e qualidade técnica</strong> — gestor: performance consistente, alta qualidade técnica, tomadas de decisão sólidas; tarefas complexas repassadas com tranquilidade total</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Colaboração além do time</strong> — apoio frequente a outros times (Hitmaker, outras squads); protagonismo nos testes cross-squad; referência de disponibilidade na tribo</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Disponibilidade (3,97 — mais alta)</strong> — "disponibiliza tempo para equipe" (4,30 cross-group); referência de acessibilidade e suporte no time</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Proatividade e adaptabilidade</strong> — identifica melhorias, propõe soluções, adapta-se a novas tecnologias rapidamente (Observabilidade, mobile, Hitmaker)</span></div>
+      </div>
+      <div class="hl-group">
+        <div class="hl-group-title lows">🔶 Lows / Oportunidades</div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Comunicar soluções adotadas</strong> — às vezes resolve problemas fora do caminho natural sem comunicar aos pares de Android; não intencional, mas pode gerar gaps de alinhamento</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Exposição espontânea de ideias</strong> — cross-group sugere expor mais opiniões proativamente, mesmo sem ser solicitado; visão técnica e de produto que precisa ser compartilhada mais ativamente</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Aprofundamento arquitetural</strong> — gestor: participar mais ativamente de decisões de arquitetura e soluções de médio-longo prazo</span></div>
+        <div class="hl-item"><span class="hl-bullet">●</span><span><strong>Visão do produto completo</strong> — expandir o contexto além da squad vai elevar ainda mais o impacto e remover qualquer limite de crescimento na carreira</span></div>
+      </div>
+      <div class="gestor-quote">"Firsen apresenta performance consistente ao longo do período avaliado, destacando-se pela entrega de resultados relevantes com elevado nível de qualidade técnica, senso de responsabilidade e foco em impacto concreto... Evidencia maturidade acima do esperado para sua senioridade." — Gestor</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /dev-grid -->
+
+<footer>
+  <div class="footer-left">
+    <span class="pp-logo">◈ PicPay</span> &nbsp;·&nbsp; Payments PJ &nbsp;·&nbsp; AVD 2025 · Gerado via HubAI Nitro
+  </div>
+  <div style="font-size:12px;color:var(--muted)">13 devs avaliados · Dados: AVD 2025 + Métricas Março/2026</div>
+</footer>
+
+<script>
+  const activeFilters = { time: 'all', avaliacao: 'all', nivel: 'all' };
+  let searchTerm = '';
+
+  function filterBy(type, val, btn) {
+    activeFilters[type] = val;
+    document.querySelectorAll(`[data-filter="${type}"]`).forEach(b => {
+      b.classList.remove('active','active-green');
+    });
+    btn.classList.add(val === 'acima' ? 'active-green' : 'active');
+    applyFilters();
+  }
+
+  function doSearch(val) {
+    searchTerm = val.toLowerCase().trim();
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const cards = document.querySelectorAll('.dev-card');
+    let visible = 0;
+    cards.forEach(card => {
+      const time = card.dataset.time;
+      const av = card.dataset.avaliacao;
+      const nivel = card.dataset.nivel;
+      const nome = card.dataset.nome.toLowerCase();
+
+      const matchTime = activeFilters.time === 'all' || time.includes(activeFilters.time);
+      const matchAv = activeFilters.avaliacao === 'all' || av === activeFilters.avaliacao;
+      const matchNivel = activeFilters.nivel === 'all' || nivel === activeFilters.nivel;
+      const matchSearch = !searchTerm || nome.includes(searchTerm);
+
+      if (matchTime && matchAv && matchNivel && matchSearch) {
+        card.classList.remove('hidden');
+        visible++;
+      } else {
+        card.classList.add('hidden');
+      }
+    });
+    document.getElementById('count-num').textContent = visible;
+  }
+
+  function toggleHL(btn) {
+    btn.classList.toggle('open');
+    const content = btn.nextElementSibling;
+    content.classList.toggle('open');
+  }
+</script>
+</body>
+</html>

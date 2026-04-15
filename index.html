@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Team Meeting — Payments PJ</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22253a;
+    --surface3: #2a2d40;
+    --border: #2e3250;
+    --accent: #6c63ff;
+    --accent2: #00d2a0;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --blue: #3b82f6;
+    --pink: #ec4899;
+    --text: #e8eaf6;
+    --muted: #8a8fb5;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.65; }
+
+  /* ── SIDEBAR NAV ── */
+  .sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0; width: 220px;
+    background: var(--surface); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; z-index: 200; overflow-y: auto;
+  }
+  .sidebar-logo {
+    padding: 20px 20px 16px; border-bottom: 1px solid var(--border);
+    font-size: 13px; font-weight: 800; color: var(--accent); letter-spacing: -0.3px;
+  }
+  .sidebar-logo span { color: var(--muted); font-weight: 400; font-size: 11px; display: block; margin-top: 2px; }
+  .sidebar-timer {
+    margin: 12px 16px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 14px; text-align: center;
+  }
+  .timer-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .timer-display { font-size: 28px; font-weight: 800; color: var(--accent2); font-variant-numeric: tabular-nums; letter-spacing: -1px; margin: 4px 0; }
+  .timer-btns { display: flex; gap: 6px; justify-content: center; margin-top: 6px; }
+  .timer-btn {
+    flex: 1; padding: 5px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface3); color: var(--text); font-size: 11px; font-weight: 600; cursor: pointer;
+    transition: all .15s;
+  }
+  .timer-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .timer-btn.running { background: rgba(239,68,68,0.15); border-color: var(--red); color: var(--red); }
+
+  .nav-section { padding: 8px 12px 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--muted); margin-top: 8px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px; padding: 8px 16px; margin: 1px 8px;
+    border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; color: var(--muted);
+    transition: all .15s; text-decoration: none;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(108,99,255,0.15); color: var(--accent); font-weight: 700; }
+  .nav-item .nav-icon { width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+  .nav-item .nav-time { margin-left: auto; font-size: 10px; background: var(--surface3); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; color: var(--muted); }
+  .nav-progress { margin: 8px 16px; }
+  .progress-bar-bg { background: var(--surface2); border-radius: 4px; height: 4px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; transition: width .3s; }
+  .progress-label { font-size: 10px; color: var(--muted); text-align: right; margin-top: 4px; }
+
+  /* ── MAIN ── */
+  .main { margin-left: 220px; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #1a1d27 0%, #0f1117 50%, #16072d 100%);
+    border-bottom: 1px solid var(--border); padding: 48px 48px 40px; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -80px; right: -80px; width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(108,99,255,0.12) 0%, transparent 70%); pointer-events: none;
+  }
+  .hero::after {
+    content: ''; position: absolute; bottom: -40px; left: 200px; width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(0,210,160,0.07) 0%, transparent 70%); pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(108,99,255,0.15); border: 1px solid rgba(108,99,255,0.3);
+    border-radius: 20px; padding: 5px 16px; font-size: 11px; font-weight: 700;
+    color: #a99fff; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 16px;
+  }
+  .hero h1 { font-size: 32px; font-weight: 800; color: #fff; letter-spacing: -1px; line-height: 1.2; }
+  .hero h1 span { color: var(--accent); }
+  .hero-sub { color: var(--muted); font-size: 14px; margin-top: 10px; max-width: 600px; }
+  .hero-meta { display: flex; gap: 20px; margin-top: 24px; flex-wrap: wrap; }
+  .hero-meta-item {
+    display: flex; align-items: center; gap: 8px; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 8px; padding: 8px 16px; font-size: 12px;
+  }
+  .hero-meta-item .hm-icon { font-size: 16px; }
+  .hero-meta-item .hm-label { color: var(--muted); font-size: 11px; }
+  .hero-meta-item .hm-val { font-weight: 700; color: var(--text); }
+
+  /* ── AGENDA STRIP ── */
+  .agenda-strip {
+    background: var(--surface2); border-bottom: 1px solid var(--border);
+    padding: 16px 48px; display: flex; gap: 8px; align-items: center; overflow-x: auto;
+  }
+  .agenda-item {
+    display: flex; align-items: center; gap: 8px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; padding: 8px 16px;
+    font-size: 12px; font-weight: 600; white-space: nowrap; cursor: pointer;
+    transition: all .15s;
+  }
+  .agenda-item:hover { border-color: var(--accent); }
+  .agenda-item .ai-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .agenda-item .ai-time { color: var(--muted); font-size: 11px; font-weight: 500; }
+  .agenda-arrow { color: var(--muted); font-size: 12px; flex-shrink: 0; }
+
+  /* ── CONTENT ── */
+  .content { padding: 40px 48px; display: flex; flex-direction: column; gap: 48px; }
+
+  /* ── SECTION ── */
+  .section { scroll-margin-top: 20px; }
+  .section-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
+  .section-icon {
+    width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center;
+    justify-content: center; font-size: 22px; flex-shrink: 0;
+  }
+  .section-title-block { flex: 1; }
+  .section-badge {
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+    padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 6px;
+  }
+  .section-title { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
+  .section-desc { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .section-time {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 6px 14px; font-size: 12px; font-weight: 700; color: var(--text); flex-shrink: 0;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  /* ── CARDS GRID ── */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; transition: border-color .15s;
+  }
+  .card:hover { border-color: rgba(108,99,255,0.4); }
+  .card-icon { font-size: 24px; margin-bottom: 12px; }
+  .card-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .card-body { font-size: 12px; color: var(--muted); line-height: 1.7; }
+  .card-body strong { color: var(--text); }
+
+  /* ── ALERT BOXES ── */
+  .alert {
+    display: flex; gap: 14px; padding: 16px 20px; border-radius: 10px; border-left: 3px solid;
+    margin-bottom: 12px; font-size: 13px; line-height: 1.6;
+  }
+  .alert-icon { font-size: 18px; flex-shrink: 0; line-height: 1.4; }
+  .alert.red { background: rgba(239,68,68,0.08); border-color: var(--red); color: #fca5a5; }
+  .alert.red strong { color: #fff; }
+  .alert.yellow { background: rgba(245,158,11,0.08); border-color: var(--yellow); color: #fcd34d; }
+  .alert.yellow strong { color: #fff; }
+  .alert.green { background: rgba(0,210,160,0.07); border-color: var(--accent2); color: #6ee7b7; }
+  .alert.green strong { color: #fff; }
+  .alert.blue { background: rgba(59,130,246,0.08); border-color: var(--blue); color: #93c5fd; }
+  .alert.blue strong { color: #fff; }
+  .alert.purple { background: rgba(108,99,255,0.08); border-color: var(--accent); color: #c4b5fd; }
+  .alert.purple strong { color: #fff; }
+
+  /* ── DO/DONT ── */
+  .do-dont { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .do-block, .dont-block { background: var(--surface); border-radius: var(--radius); padding: 20px; }
+  .do-block { border: 1px solid rgba(0,210,160,0.3); }
+  .dont-block { border: 1px solid rgba(239,68,68,0.3); }
+  .do-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .do-title.green { color: var(--accent2); }
+  .do-title.red { color: var(--red); }
+  .dd-item { display: flex; gap: 10px; margin-bottom: 10px; font-size: 12px; color: #c8d0e8; line-height: 1.5; }
+  .dd-item:last-child { margin-bottom: 0; }
+  .dd-dot { flex-shrink: 0; margin-top: 3px; font-size: 14px; }
+
+  /* ── PROCESS FLOW ── */
+  .flow { display: flex; align-items: flex-start; gap: 0; flex-wrap: wrap; margin: 20px 0; }
+  .flow-step {
+    display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 100px;
+    position: relative;
+  }
+  .flow-step:not(:last-child)::after {
+    content: '→'; position: absolute; right: -12px; top: 16px; color: var(--muted); font-size: 16px; z-index: 1;
+  }
+  .flow-bubble {
+    width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-size: 16px; margin-bottom: 8px; border: 2px solid;
+  }
+  .flow-label { font-size: 11px; color: var(--muted); text-align: center; font-weight: 600; line-height: 1.3; }
+  .flow-sublabel { font-size: 10px; color: #4a5080; text-align: center; margin-top: 2px; }
+
+  /* ── TABLE ── */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 10px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); border-bottom: 1px solid var(--border); background: var(--surface2); font-weight: 700; }
+  td { padding: 12px 16px; border-bottom: 1px solid rgba(46,50,80,0.5); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+
+  /* ── PILL TAGS ── */
+  .pill {
+    display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    margin: 2px;
+  }
+  .pill-red { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+  .pill-green { background: rgba(0,210,160,0.12); color: #34d399; border: 1px solid rgba(0,210,160,0.25); }
+  .pill-yellow { background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.25); }
+  .pill-blue { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.25); }
+  .pill-purple { background: rgba(108,99,255,0.15); color: #a78bfa; border: 1px solid rgba(108,99,255,0.3); }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; }
+  .checklist li { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,50,80,0.4); font-size: 13px; align-items: flex-start; }
+  .checklist li:last-child { border-bottom: none; }
+  .check-box { width: 20px; height: 20px; border-radius: 5px; border: 2px solid var(--border); flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; }
+  .checklist li strong { color: #fff; }
+  .checklist li span { color: var(--muted); }
+
+  /* ── HIGHLIGHT BOX ── */
+  .highlight {
+    background: linear-gradient(135deg, rgba(108,99,255,0.1), rgba(0,210,160,0.06));
+    border: 1px solid rgba(108,99,255,0.25); border-radius: var(--radius);
+    padding: 24px; margin: 16px 0;
+  }
+  .highlight-title { font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+  .highlight-body { font-size: 13px; color: #c5c0f0; line-height: 1.7; }
+
+  /* ── QUOTE ── */
+  .quote {
+    border-left: 3px solid var(--accent); background: rgba(108,99,255,0.06);
+    padding: 16px 20px; border-radius: 0 8px 8px 0; font-size: 14px; font-style: italic;
+    color: #c5c0f0; margin: 16px 0; line-height: 1.7;
+  }
+
+  /* ── TWO COL ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
+
+  /* ── SECTION SEPARATOR ── */
+  .section-sep {
+    height: 4px; border-radius: 2px; margin-bottom: 40px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), transparent);
+  }
+
+  /* ── METRIC CARDS ── */
+  .metric-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; text-align: center;
+  }
+  .metric-num { font-size: 36px; font-weight: 800; line-height: 1; margin-bottom: 6px; }
+  .metric-label { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .metric-sub { font-size: 11px; color: #4a5080; margin-top: 4px; }
+
+  /* ── AI BADGE ── */
+  .ai-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(135deg, rgba(108,99,255,0.2), rgba(0,210,160,0.1));
+    border: 1px solid rgba(108,99,255,0.4); border-radius: 6px;
+    padding: 3px 10px; font-size: 11px; font-weight: 700; color: #a99fff;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--surface2); border-top: 1px solid var(--border);
+    padding: 20px 48px; display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .footer-left { font-size: 12px; color: var(--muted); }
+  .pp-logo { color: var(--accent); font-weight: 700; font-size: 13px; }
+
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .content { padding: 24px 20px; }
+    .hero { padding: 32px 24px; }
+    .agenda-strip { padding: 12px 20px; }
+    .do-dont, .two-col, .three-col { grid-template-columns: 1fr; }
+    footer { padding: 16px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    ◈ Payments PJ
+    <span>Team Meeting Guide</span>
+  </div>
+
+  <div class="sidebar-timer">
+    <div class="timer-label">Tempo de reunião</div>
+    <div class="timer-display" id="timer">00:00</div>
+    <div class="timer-btns">
+      <button class="timer-btn" id="timer-btn" onclick="toggleTimer()">▶ Start</button>
+      <button class="timer-btn" onclick="resetTimer()">↺ Reset</button>
+    </div>
+  </div>
+
+  <div class="nav-progress">
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="progress-label" id="progress-label">0 / 6 seções</div>
+  </div>
+
+  <div class="nav-section">Abertura</div>
+  <a class="nav-item" href="#abertura" onclick="setActive(this)">
+    <span class="nav-icon" style="background:rgba(108,99,255,0.15)">🎯</span>
+    Abertura
+    <span class="nav-time">5min</span>
+  </a>
+
+  <div class="nav-section">Temas Latentes</div>
+  <a class="nav-item" href="#horas" onclick="setActive(this)">
+    <span class="nav-icon" style="background:rgba(239,68,68,0.15)">⏰</span>
+    Gestão de Horas
+    <span class="nav-time">10min</span>
+  </a>
+  <a class="nav-item" href="#tarefas" onclick="setActive(this)">
+    <span class="nav-icon" style="background:rgba(245,158,11,0.15)">📋</span>
+    Gestão de Tarefas
+    <span class="nav-time">8min</span>
+  </a>
+  <a class="nav-item" href="#suporte" onclick="setActive(this)">
+    <span class="nav-icon" style="background:rgba(59,130,246,0.15)">🎧</span>
+    Pedidos de Suporte
+    <span class="nav-time">7min</span>
+  </a>
+  <a class="nav-item" href="#pdi" onclick="setActive(this)">
+    <span class="nav-icon" style="background:rgba(0,210,160,0.15)">🌱</span>
+    PDI
+    <span class="nav-time">5min</span>
+  </a>
+
+  <div class="nav-section">Boas Práticas</div>
+  <a class="nav-item" href="#engenharia" onclick="setActive(this)">
+    <span class="nav-icon" style="background:rgba(108,99,255,0.15)">⚙️</span>
+    Eng. de Software
+    <span class="nav-time">10min</span>
+  </a>
+  <a class="nav-item" href="#ai-first" onclick="setActive(this)">
+    <span class="nav-icon" style="background:linear-gradient(135deg,rgba(108,99,255,0.2),rgba(0,210,160,0.1))">🤖</span>
+    AI First
+    <span class="nav-time">8min</span>
+  </a>
+  <a class="nav-item" href="#dor-dod" onclick="setActive(this)">
+    <span class="nav-icon" style="background:rgba(236,72,153,0.15)">✅</span>
+    DoR &amp; DoD
+    <span class="nav-time">7min</span>
+  </a>
+</nav>
+
+<!-- ── MAIN ── -->
+<div class="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-badge">📅 Reunião de Time · Payments PJ</div>
+    <h1>Team Meeting<br/><span>Alinhamentos & Boas Práticas</span></h1>
+    <p class="hero-sub">Guia de facilitação para a reunião de 1 hora com todos os devs da estrutura — temas latentes, cultura de engenharia e próximos passos.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item">
+        <span class="hm-icon">⏱️</span>
+        <div><div class="hm-label">Duração</div><div class="hm-val">60 minutos</div></div>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hm-icon">👥</span>
+        <div><div class="hm-label">Audiência</div><div class="hm-val">Todo o time de devs</div></div>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hm-icon">🎯</span>
+        <div><div class="hm-label">Objetivo</div><div class="hm-val">Alinhar, orientar e engajar</div></div>
+      </div>
+      <div class="hero-meta-item">
+        <span class="hm-icon">🏢</span>
+        <div><div class="hm-label">Divisão</div><div class="hm-val">Serviços Financeiros PJ</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AGENDA STRIP -->
+  <div class="agenda-strip">
+    <div class="agenda-item" onclick="document.getElementById('abertura').scrollIntoView({behavior:'smooth'})">
+      <span class="ai-dot" style="background:#6c63ff"></span>
+      <span>Abertura</span>
+      <span class="ai-time">0–5min</span>
+    </div>
+    <span class="agenda-arrow">›</span>
+    <div class="agenda-item" onclick="document.getElementById('horas').scrollIntoView({behavior:'smooth'})">
+      <span class="ai-dot" style="background:#ef4444"></span>
+      <span>Gestão de Horas</span>
+      <span class="ai-time">5–15min</span>
+    </div>
+    <span class="agenda-arrow">›</span>
+    <div class="agenda-item" onclick="document.getElementById('tarefas').scrollIntoView({behavior:'smooth'})">
+      <span class="ai-dot" style="background:#f59e0b"></span>
+      <span>Tarefas</span>
+      <span class="ai-time">15–23min</span>
+    </div>
+    <span class="agenda-arrow">›</span>
+    <div class="agenda-item" onclick="document.getElementById('suporte').scrollIntoView({behavior:'smooth'})">
+      <span class="ai-dot" style="background:#3b82f6"></span>
+      <span>Suporte</span>
+      <span class="ai-time">23–30min</span>
+    </div>
+    <span class="agenda-arrow">›</span>
+    <div class="agenda-item" onclick="document.getElementById('pdi').scrollIntoView({behavior:'smooth'})">
+      <span class="ai-dot" style="background:#00d2a0"></span>
+      <span>PDI</span>
+      <span class="ai-time">30–35min</span>
+    </div>
+    <span class="agenda-arrow">›</span>
+    <div class="agenda-item" onclick="document.getElementById('engenharia').scrollIntoView({behavior:'smooth'})">
+      <span class="ai-dot" style="background:#a78bfa"></span>
+      <span>Eng. Software</span>
+      <span class="ai-time">35–45min</span>
+    </div>
+    <span class="agenda-arrow">›</span>
+    <div class="agenda-item" onclick="document.getElementById('ai-first').scrollIntoView({behavior:'smooth'})">
+      <span class="ai-dot" style="background:linear-gradient(135deg,#6c63ff,#00d2a0)"></span>
+      <span>AI First</span>
+      <span class="ai-time">45–53min</span>
+    </div>
+    <span class="agenda-arrow">›</span>
+    <div class="agenda-item" onclick="document.getElementById('dor-dod').scrollIntoView({behavior:'smooth'})">
+      <span class="ai-dot" style="background:#ec4899"></span>
+      <span>DoR &amp; DoD</span>
+      <span class="ai-time">53–60min</span>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ══════════════════════════════════ ABERTURA ══════════════════════════════════ -->
+    <section class="section" id="abertura">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(108,99,255,0.15)">🎯</div>
+        <div class="section-title-block">
+          <div class="section-badge" style="background:rgba(108,99,255,0.15);color:#a99fff">Abertura · 0–5 min</div>
+          <div class="section-title">Contexto e tom da conversa</div>
+          <div class="section-desc">Criar o espaço certo antes de entrar nos temas</div>
+        </div>
+      </div>
+
+      <div class="highlight">
+        <div class="highlight-title">💬 Fala de abertura sugerida</div>
+        <div class="highlight-body">
+          "Quero agradecer a presença de todos. Essa reunião não é uma cobrança — é um alinhamento que eu, como gestor, devo a vocês. Vou falar sobre alguns temas do dia a dia que precisam de clareza, e depois vamos conversar sobre boas práticas de engenharia que eu acredito que são diferenciais de carreira pra todo mundo aqui. Quero que seja uma conversa, não uma palestra — sintam-se à vontade para interromper e perguntar."
+        </div>
+      </div>
+
+      <div class="cards-grid" style="margin-top:16px">
+        <div class="card">
+          <div class="card-icon">🧭</div>
+          <div class="card-title">Estrutura da reunião</div>
+          <div class="card-body">
+            Primeiro vamos resolver <strong>temas operacionais</strong> que estão gerando ruído ou dúvida (~30min), depois entramos em <strong>boas práticas</strong> de engenharia e cultura de qualidade (~25min), e encerramos com próximos passos e perguntas (~5min).
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🤝</div>
+          <div class="card-title">Contrato da reunião</div>
+          <div class="card-body">
+            <strong>Câmeras ligadas</strong> se possível.<br/>
+            <strong>Perguntem</strong> durante — não precisa esperar o final.<br/>
+            <strong>O que for dito aqui fica aqui</strong> — é um espaço seguro.<br/>
+            <strong>Sem julgamento</strong> — dúvida não é fraqueza.
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-icon">📌</div>
+          <div class="card-title">Por que esses temas agora?</div>
+          <div class="card-body">
+            Alguns padrões operacionais estão <strong>custando energia do time</strong> desnecessariamente. Clareza sobre como funciona libera foco para o que importa: <strong>entregar com qualidade e crescer profissionalmente</strong>.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-sep"></div>
+
+    <!-- ══════════════════════════════════ GESTÃO DE HORAS ══════════════════════════════════ -->
+    <section class="section" id="horas">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(239,68,68,0.15)">⏰</div>
+        <div class="section-title-block">
+          <div class="section-badge" style="background:rgba(239,68,68,0.12);color:#f87171">Temas Latentes · 5–15 min</div>
+          <div class="section-title">Gestão de Horas</div>
+          <div class="section-desc">Hora extra, acionamentos interjornada e deploys fora do horário</div>
+        </div>
+        <div class="section-time">⏱️ 10 min</div>
+      </div>
+
+      <div class="alert red">
+        <span class="alert-icon">🚨</span>
+        <div><strong>Ponto crítico:</strong> Hora extra não é uma opção sem aprovação prévia. Acionamento entre jornadas e entradas antecipadas por deploy são práticas que precisam de atenção imediata — além do impacto no colaborador, geram passivo trabalhista real para a empresa.</div>
+      </div>
+
+      <div class="two-col" style="margin-top:20px">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:12px;display:flex;align-items:center;gap:8px;">📜 Como funciona de verdade</div>
+          <ul class="checklist">
+            <li>
+              <div class="check-box"></div>
+              <div><strong>Hora extra precisa de aprovação prévia</strong><span> — nunca posterior. O caminho certo é comunicar a necessidade ao gestor antes de estender o horário.</span></div>
+            </li>
+            <li>
+              <div class="check-box"></div>
+              <div><strong>Interjornada mínima de 11h</strong><span> — se você saiu às 22h, não deve ser acionado antes das 9h do dia seguinte. Isso é lei (CLT, Art. 66).</span></div>
+            </li>
+            <li>
+              <div class="check-box"></div>
+              <div><strong>Deploy não justifica entrar cedo</strong><span> — se o deploy requer entrada às 7h, isso precisa ser tratado como hora extra ou reorganização da jornada, não como "favor ao time".</span></div>
+            </li>
+            <li>
+              <div class="check-box"></div>
+              <div><strong>On-call não é horas perdidas</strong><span> — acionamentos fora do horário geram compensação. Documente e comunique ao gestor.</span></div>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <div class="do-dont" style="grid-template-columns:1fr;">
+            <div class="dont-block" style="margin-bottom:14px">
+              <div class="do-title red">❌ Não fazer</div>
+              <div class="dd-item"><span class="dd-dot">●</span><span>Trabalhar além do horário sem comunicar ao gestor</span></div>
+              <div class="dd-item"><span class="dd-dot">●</span><span>Entrar cedo "pra ajudar o time" no deploy sem registro</span></div>
+              <div class="dd-item"><span class="dd-dot">●</span><span>Responder chamado às 23h sem anotar o acionamento</span></div>
+              <div class="dd-item"><span class="dd-dot">●</span><span>Assumir que o gestor "sabe" que trabalhou extra</span></div>
+            </div>
+            <div class="do-block">
+              <div class="do-title green">✅ Fazer sempre</div>
+              <div class="dd-item"><span class="dd-dot">●</span><span>Comunicar ao gestor antes de qualquer extensão de jornada</span></div>
+              <div class="dd-item"><span class="dd-dot">●</span><span>Registrar todo acionamento fora do horário (hora, motivo, duração)</span></div>
+              <div class="dd-item"><span class="dd-dot">●</span><span>Planejar deploys críticos dentro do horário comercial sempre que possível</span></div>
+              <div class="dd-item"><span class="dd-dot">●</span><span>Usar banco de horas quando aplicável e combinado previamente</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert yellow" style="margin-top:20px">
+        <span class="alert-icon">⚠️</span>
+        <div><strong>Mensagem para o time:</strong> Eu, como gestor, não quero que vocês trabalhem mais do que o combinado sem que eu saiba. Isso protege vocês <em>e</em> a empresa. Se a demanda exige mais horas, o problema está no planejamento — e aí eu preciso saber para ajustar. Não resolvam sozinhos absolvendo sobrecarga em silêncio.</div>
+      </div>
+
+      <div class="three-col" style="margin-top:20px">
+        <div class="metric-card">
+          <div class="metric-num" style="color:var(--red)">11h</div>
+          <div class="metric-label">Interjornada mínima</div>
+          <div class="metric-sub">CLT, Art. 66 — obrigatório</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-num" style="color:var(--yellow)">2h</div>
+          <div class="metric-label">Máx. hora extra/dia</div>
+          <div class="metric-sub">Requer acordo e aprovação</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-num" style="color:var(--accent2)">24h</div>
+          <div class="metric-label">Para comunicar ao gestor</div>
+          <div class="metric-sub">Prazo ideal para antecipar</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-sep"></div>
+
+    <!-- ══════════════════════════════════ GESTÃO DE TAREFAS ══════════════════════════════════ -->
+    <section class="section" id="tarefas">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(245,158,11,0.15)">📋</div>
+        <div class="section-title-block">
+          <div class="section-badge" style="background:rgba(245,158,11,0.12);color:#fbbf24">Temas Latentes · 15–23 min</div>
+          <div class="section-title">Gestão de Tarefas no Board</div>
+          <div class="section-desc">Movimentação correta das issues — por que isso importa além do processo</div>
+        </div>
+        <div class="section-time">⏱️ 8 min</div>
+      </div>
+
+      <div class="quote">
+        "O board não é burocracia — é o espelho do que o time está fazendo. Quando ele não reflete a realidade, não consigo proteger o time, priorizar corretamente ou mostrar o valor das entregas para a liderança."
+      </div>
+
+      <div style="margin:20px 0">
+        <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:16px">🔄 Fluxo correto de movimentação</div>
+        <div class="flow">
+          <div class="flow-step">
+            <div class="flow-bubble" style="background:rgba(99,102,241,0.15);border-color:#6366f1">📥</div>
+            <div class="flow-label">Backlog</div>
+            <div class="flow-sublabel">Refinada e priorizada</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-bubble" style="background:rgba(59,130,246,0.15);border-color:#3b82f6">🎯</div>
+            <div class="flow-label">Ready to Dev</div>
+            <div class="flow-sublabel">DoR atendida</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-bubble" style="background:rgba(245,158,11,0.15);border-color:#f59e0b">⚒️</div>
+            <div class="flow-label">In Development</div>
+            <div class="flow-sublabel">Mover ao iniciar</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-bubble" style="background:rgba(168,85,247,0.15);border-color:#a855f7">👀</div>
+            <div class="flow-label">Code Review</div>
+            <div class="flow-sublabel">PR aberto</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-bubble" style="background:rgba(236,72,153,0.15);border-color:#ec4899">🧪</div>
+            <div class="flow-label">In Test / QA</div>
+            <div class="flow-sublabel">Validação</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-bubble" style="background:rgba(34,197,94,0.15);border-color:#22c55e">🚀</div>
+            <div class="flow-label">Ready to Deploy</div>
+            <div class="flow-sublabel">Aprovado</div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-bubble" style="background:rgba(0,210,160,0.15);border-color:#00d2a0">✅</div>
+            <div class="flow-label">Done</div>
+            <div class="flow-sublabel">Em produção</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="do-dont" style="margin-top:20px">
+        <div class="dont-block">
+          <div class="do-title red">❌ O que está acontecendo</div>
+          <div class="dd-item"><span class="dd-dot">●</span><span>Tarefa fica em <strong>Backlog ou Ready to Dev</strong> enquanto o dev já começou há dias</span></div>
+          <div class="dd-item"><span class="dd-dot">●</span><span>Task vai direto de <strong>In Dev para Done</strong>, pulando CR e QA</span></div>
+          <div class="dd-item"><span class="dd-dot">●</span><span><strong>WIP real</strong> é diferente do WIP do board — métricas de Cycle Time ficam erradas</span></div>
+          <div class="dd-item"><span class="dd-dot">●</span><span>Tarefa concluída fica dias em <strong>Ready to Deploy</strong> ou In Test sem atualização</span></div>
+          <div class="dd-item"><span class="dd-dot">●</span><span>Impedimentos não são sinalizados com <strong>flag</strong> — bloqueios ficam invisíveis</span></div>
+        </div>
+        <div class="do-block">
+          <div class="do-title green">✅ Como deve ser</div>
+          <div class="dd-item"><span class="dd-dot">●</span><span><strong>Mover ao iniciar</strong> — assim que começar a tarefa, ela vai pra In Development</span></div>
+          <div class="dd-item"><span class="dd-dot">●</span><span><strong>Um item por vez</strong> idealmente — WIP alto é um sintoma, não uma solução</span></div>
+          <div class="dd-item"><span class="dd-dot">●</span><span>Ao abrir PR → mover para <strong>Waiting Code Review</strong> imediatamente</span></div>
+          <div class="dd-item"><span class="dd-dot">●</span><span><strong>Flag de impedimento</strong> se bloqueado: não avança, mas fica visível para o gestor agir</span></div>
+          <div class="dd-item"><span class="dd-dot">●</span><span>Done = <strong>em produção</strong>, não "dev finalizou". Só fechar quando entregue no ambiente correto</span></div>
+        </div>
+      </div>
+
+      <div class="alert blue" style="margin-top:20px">
+        <span class="alert-icon">📊</span>
+        <div><strong>Por que isso importa pra você:</strong> O Cycle Time calculado com base no board é o que mostra sua velocidade de entrega. Se a tarefa ficou 10 dias em Dev mas você só colocou lá no último dia, o metric reflete 1 dia — e aí não consigo identificar onde o time precisa de ajuda real. <strong>Board correto = dados que protegem o time.</strong></div>
+      </div>
+    </section>
+
+    <div class="section-sep"></div>
+
+    <!-- ══════════════════════════════════ SUPORTE ══════════════════════════════════ -->
+    <section class="section" id="suporte">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(59,130,246,0.15)">🎧</div>
+        <div class="section-title-block">
+          <div class="section-badge" style="background:rgba(59,130,246,0.12);color:#60a5fa">Temas Latentes · 23–30 min</div>
+          <div class="section-title">Gestão de Pedidos de Suporte</div>
+          <div class="section-desc">Como triar, registrar e resolver sem virar um gargalo invisível</div>
+        </div>
+        <div class="section-time">⏱️ 7 min</div>
+      </div>
+
+      <div class="alert yellow">
+        <span class="alert-icon">⚠️</span>
+        <div><strong>Problema atual:</strong> Pedidos de suporte chegam por Slack, WhatsApp, mensagem direta, mesa — e muitos são absorvidos sem registro. Isso <strong>invisibiliza o custo real de suporte</strong> para o time e impede otimizações. Se não está no board, não existe para fins de planejamento.</div>
+      </div>
+
+      <div class="two-col" style="margin-top:20px">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:14px">📥 Fluxo de triagem de suporte</div>
+          <div class="card" style="margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+              <span style="background:rgba(59,130,246,0.2);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#60a5fa;flex-shrink:0">1</span>
+              <strong>Chegou um pedido — qual canal?</strong>
+            </div>
+            <div class="card-body">Independente de onde veio (Slack, HeroDash, e-mail), <strong>sempre abrir uma issue tipo Support no Jira</strong> do projeto correspondente. Sem registro, não existe.</div>
+          </div>
+          <div class="card" style="margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+              <span style="background:rgba(245,158,11,0.2);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fbbf24;flex-shrink:0">2</span>
+              <strong>É bug, melhoria ou dúvida?</strong>
+            </div>
+            <div class="card-body">
+              <span class="pill pill-red">Bug</span> → Issue tipo Problema<br/>
+              <span class="pill pill-yellow">Dúvida operacional</span> → Issue Support<br/>
+              <span class="pill pill-blue">Melhoria</span> → Refinamento no próximo ciclo
+            </div>
+          </div>
+          <div class="card">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+              <span style="background:rgba(0,210,160,0.2);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#34d399;flex-shrink:0">3</span>
+              <strong>Prioridade e responsável</strong>
+            </div>
+            <div class="card-body">Defina prioridade (<span class="pill pill-red">P1</span> <span class="pill pill-yellow">P2</span> <span class="pill pill-blue">P3</span>), atribua assignee e mova pelo board normalmente. Suporte é trabalho — tem que aparecer nas métricas.</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:14px">🎯 Regras de ouro do suporte</div>
+          <div class="alert blue" style="margin-bottom:10px">
+            <span class="alert-icon">📌</span>
+            <div><strong>Nenhum pedido resolvido "na hora" sem registro.</strong> Mesmo que levou 5 minutos, crie a issue, resolva e feche. O histórico é o ativo.</div>
+          </div>
+          <div class="alert purple" style="margin-bottom:10px">
+            <span class="alert-icon">🔁</span>
+            <div><strong>Suporte recorrente = bug ou gap de produto.</strong> Se o mesmo tipo de pedido aparece 3x, vire uma história de melhoria. Não resolva o sintoma infinitamente.</div>
+          </div>
+          <div class="alert green" style="margin-bottom:10px">
+            <span class="alert-icon">⏱️</span>
+            <div><strong>SLA interno:</strong> P1 (produção parada) → acionamento imediato. P2 (degradado) → no mesmo dia. P3 (dúvida/melhoria) → próxima sprint.</div>
+          </div>
+          <div class="alert yellow">
+            <span class="alert-icon">🗣️</span>
+            <div><strong>Comunique o status</strong> para quem pediu. "Estou olhando", "resolvido", "vai pra próxima sprint" — o silêncio gera mais acionamento desnecessário.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-sep"></div>
+
+    <!-- ══════════════════════════════════ PDI ══════════════════════════════════ -->
+    <section class="section" id="pdi">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(0,210,160,0.15)">🌱</div>
+        <div class="section-title-block">
+          <div class="section-badge" style="background:rgba(0,210,160,0.1);color:#34d399">Temas Latentes · 30–35 min</div>
+          <div class="section-title">PDI — Plano de Desenvolvimento Individual</div>
+          <div class="section-desc">Desenvolvimento é responsabilidade compartilhada — minha e sua</div>
+        </div>
+        <div class="section-time">⏱️ 5 min</div>
+      </div>
+
+      <div class="two-col">
+        <div>
+          <div class="highlight">
+            <div class="highlight-title">🤝 Meu compromisso com vocês</div>
+            <div class="highlight-body">
+              Cada pessoa aqui tem um PDI estruturado comigo. Se você ainda não tem ou ele está desatualizado, quero que a gente corrija isso nas próximas semanas. O PDI não é formalidade — é um contrato de desenvolvimento entre nós dois.
+            </div>
+          </div>
+          <div class="card" style="margin-top:14px">
+            <div class="card-icon">📋</div>
+            <div class="card-title">O que um PDI precisa ter</div>
+            <div class="card-body">
+              <strong>Onde estou hoje</strong> — senioridade, skills, pontos de atenção da AVD<br/>
+              <strong>Onde quero chegar</strong> — próximo nível, especialização, liderança<br/>
+              <strong>Como vamos chegar</strong> — ações concretas, cursos, projetos, mentoria<br/>
+              <strong>Quando</strong> — marcos trimestrais mensuráveis<br/>
+              <strong>Como vamos medir</strong> — critérios claros de evolução
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:12px">📌 Responsabilidades no PDI</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Responsabilidade</th><th>De quem?</th></tr></thead>
+              <tbody>
+                <tr><td>Definir metas de desenvolvimento</td><td><span class="pill pill-purple">Conjunto</span></td></tr>
+                <tr><td>Executar as ações do PDI</td><td><span class="pill pill-blue">Dev</span></td></tr>
+                <tr><td>Dar contexto e oportunidades</td><td><span class="pill pill-green">Gestor</span></td></tr>
+                <tr><td>Solicitar revisão quando necessário</td><td><span class="pill pill-blue">Dev</span></td></tr>
+                <tr><td>Fazer check-in mensal de progresso</td><td><span class="pill pill-purple">Conjunto</span></td></tr>
+                <tr><td>Ajustar prioridades conforme contexto</td><td><span class="pill pill-purple">Conjunto</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="alert green" style="margin-top:14px">
+            <span class="alert-icon">🎯</span>
+            <div><strong>Ação concreta:</strong> Quem ainda não teve o 1:1 de PDI comigo, me manda mensagem essa semana para agendar. Não é opcional — é parte da minha responsabilidade como gestor de vocês.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-sep"></div>
+
+    <!-- ══════════════════════════════════ ENGENHARIA ══════════════════════════════════ -->
+    <section class="section" id="engenharia">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(108,99,255,0.15)">⚙️</div>
+        <div class="section-title-block">
+          <div class="section-badge" style="background:rgba(108,99,255,0.15);color:#a99fff">Boas Práticas · 35–45 min</div>
+          <div class="section-title">Boas Práticas de Engenharia de Software</div>
+          <div class="section-desc">Os princípios que fazem a diferença entre entregar e entregar bem</div>
+        </div>
+        <div class="section-time">⏱️ 10 min</div>
+      </div>
+
+      <div class="cards-grid">
+        <div class="card" style="border-color:rgba(99,102,241,0.3)">
+          <div class="card-icon">🧹</div>
+          <div class="card-title">Clean Code não é perfeccionismo</div>
+          <div class="card-body">
+            É sobre <strong>legibilidade e manutenibilidade</strong>. Código que você escreve hoje vai ser lido por outra pessoa amanhã — talvez por você mesmo em 6 meses. Nomes claros, funções pequenas e coesas, sem comentários que explicam o óbvio. O código deve se auto-documentar.
+          </div>
+        </div>
+        <div class="card" style="border-color:rgba(245,158,11,0.3)">
+          <div class="card-icon">🧪</div>
+          <div class="card-title">Testes não são opcionais</div>
+          <div class="card-body">
+            Teste unitário cobre a lógica. Teste de integração cobre o contrato. Sem testes, você está <strong>empurrando o risco para produção</strong>. A regra prática: se você não consegue testar, o design provavelmente está errado. Refatore antes de seguir.
+          </div>
+        </div>
+        <div class="card" style="border-color:rgba(0,210,160,0.3)">
+          <div class="card-icon">📐</div>
+          <div class="card-title">SOLID na prática</div>
+          <div class="card-body">
+            <strong>S</strong>ingle Responsibility: uma classe, uma razão para mudar.<br/>
+            <strong>O</strong>pen/Closed: aberto para extensão, fechado para modificação.<br/>
+            <strong>D</strong>IP: dependa de abstrações, não implementações.<br/>
+            Esses três sozinhos resolvem 80% dos problemas de arquitetura do dia a dia.
+          </div>
+        </div>
+        <div class="card" style="border-color:rgba(236,72,153,0.3)">
+          <div class="card-icon">🔍</div>
+          <div class="card-title">Code Review é trabalho, não formalidade</div>
+          <div class="card-body">
+            PR aberto &gt; 24h sem revisão é um problema do time, não do autor. <strong>Revisar código é tão importante quanto escrever código</strong>. Comentário de CR deve ser sobre o código, nunca sobre a pessoa. E "LGTM" sem ler não é revisão.
+          </div>
+        </div>
+        <div class="card" style="border-color:rgba(59,130,246,0.3)">
+          <div class="card-icon">📊</div>
+          <div class="card-title">Observabilidade desde o design</div>
+          <div class="card-body">
+            Toda feature nova deve ter: <strong>métricas</strong> (o que medir?), <strong>logs estruturados</strong> (o que registrar?), <strong>traces</strong> (como rastrear uma requisição?). Sem observabilidade, incidentes em produção viram caça ao tesouro. O time de Plataforma PIX já entrega 50+ batches com IA assistida — use as ferramentas disponíveis.
+          </div>
+        </div>
+        <div class="card" style="border-color:rgba(168,85,247,0.3)">
+          <div class="card-icon">⚡</div>
+          <div class="card-title">Débito técnico é dívida com juros</div>
+          <div class="card-body">
+            Todo débito técnico aceito conscientemente precisa de <strong>uma issue no board</strong>. Se não está registrado, não existe para fins de planejamento. E débito técnico não pago dobra de custo a cada 6 meses. Façamos o rastreamento direito.
+          </div>
+        </div>
+      </div>
+
+      <div class="highlight" style="margin-top:20px">
+        <div class="highlight-title">💡 Princípio central</div>
+        <div class="highlight-body">
+          A velocidade sustentável de um time de engenharia é determinada pela qualidade do código base, não pela quantidade de horas trabalhadas. Código de má qualidade vai desacelerar todo o time ao longo do tempo. <strong>Qualidade técnica é uma decisão estratégica, não um luxo.</strong>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-sep"></div>
+
+    <!-- ══════════════════════════════════ AI FIRST ══════════════════════════════════ -->
+    <section class="section" id="ai-first">
+      <div class="section-header">
+        <div class="section-icon" style="background:linear-gradient(135deg,rgba(108,99,255,0.2),rgba(0,210,160,0.15))">🤖</div>
+        <div class="section-title-block">
+          <div class="section-badge" style="background:linear-gradient(135deg,rgba(108,99,255,0.2),rgba(0,210,160,0.1));color:#a99fff">Boas Práticas · 45–53 min</div>
+          <div class="section-title">AI First — Desenvolvimento Assistido por IA</div>
+          <div class="section-desc">Não é sobre substituição — é sobre amplificação da sua capacidade</div>
+        </div>
+        <div class="section-time">⏱️ 8 min</div>
+      </div>
+
+      <div class="alert purple">
+        <span class="alert-icon">📊</span>
+        <div><strong>Contexto do nosso time:</strong> Em março/2026, <strong>54% de todas as subtarefas</strong> entregues na tribo Payments PJ foram assistidas por IA (70 batches IA + 24 semi-IA). A Plataforma Pix PJ está com 76% de adoção. Isso não é tendência — já é realidade no nosso dia a dia.</div>
+      </div>
+
+      <div class="two-col" style="margin-top:20px">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:14px">🎯 Como usar IA de forma responsável</div>
+          <div class="card" style="margin-bottom:12px">
+            <div class="card-icon">✍️</div>
+            <div class="card-title">IA como copiloto, não piloto</div>
+            <div class="card-body">O código gerado pela IA precisa ser <strong>entendido, revisado e validado por você</strong>. Nunca cole código de IA sem ler. Você é responsável pelo que entra em produção, não a ferramenta.</div>
+          </div>
+          <div class="card" style="margin-bottom:12px">
+            <div class="card-icon">🔒</div>
+            <div class="card-title">Atenção com dados sensíveis</div>
+            <div class="card-body"><strong>Nunca envie dados de produção</strong> (credenciais, dados de clientes, variáveis de ambiente) para ferramentas de IA externas. Use apenas as ferramentas aprovadas internamente pelo PicPay.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon">📚</div>
+            <div class="card-title">IA não substitui entender o domínio</div>
+            <div class="card-body">Quanto <strong>mais você entende</strong> o domínio (Pix, regras de negócio, arquitetura), <strong>melhor são os prompts</strong> que você consegue formular e <strong>melhor você avalia</strong> as respostas da IA. Domínio técnico e IA se potencializam.</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:14px">⚡ Onde a IA acelera mais no nosso contexto</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Caso de uso</th><th>Ganho</th></tr></thead>
+              <tbody>
+                <tr><td>Escrever testes unitários</td><td><span class="pill pill-green">Alto</span></td></tr>
+                <tr><td>Documentação e comentários</td><td><span class="pill pill-green">Alto</span></td></tr>
+                <tr><td>Boilerplate e scaffold</td><td><span class="pill pill-green">Alto</span></td></tr>
+                <tr><td>Code review assistido</td><td><span class="pill pill-yellow">Médio</span></td></tr>
+                <tr><td>Debug e análise de logs</td><td><span class="pill pill-yellow">Médio</span></td></tr>
+                <tr><td>Decisões arquiteturais</td><td><span class="pill pill-red">Baixo — requer contexto humano</span></td></tr>
+                <tr><td>Regras de negócio complexas</td><td><span class="pill pill-red">Baixo — exige validação rigorosa</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="alert green" style="margin-top:14px">
+            <span class="alert-icon">🚀</span>
+            <div><strong>Expectativa:</strong> Quero que todos do time experimentem IA nas entregas. Não é imposição de ferramenta — é abertura para reduzir fricção nas tarefas repetitivas e liberar energia para o que realmente exige raciocínio humano.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-sep"></div>
+
+    <!-- ══════════════════════════════════ DOR / DOD ══════════════════════════════════ -->
+    <section class="section" id="dor-dod">
+      <div class="section-header">
+        <div class="section-icon" style="background:rgba(236,72,153,0.15)">✅</div>
+        <div class="section-title-block">
+          <div class="section-badge" style="background:rgba(236,72,153,0.12);color:#f472b6">Boas Práticas · 53–60 min</div>
+          <div class="section-title">DoR &amp; DoD — Definition of Ready e Definition of Done</div>
+          <div class="section-desc">A diferença entre começar certo e terminar de verdade</div>
+        </div>
+        <div class="section-time">⏱️ 7 min</div>
+      </div>
+
+      <div class="do-dont">
+        <div style="background:var(--surface);border:1px solid rgba(59,130,246,0.35);border-radius:var(--radius);padding:22px">
+          <div class="do-title" style="color:#60a5fa">📥 DoR — Definition of Ready</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Uma tarefa só entra em desenvolvimento se:</div>
+          <div class="dd-item"><span class="dd-dot">☑️</span><span><strong>Objetivo claro:</strong> "O que" precisa ser feito e "por quê" está descrito</span></div>
+          <div class="dd-item"><span class="dd-dot">☑️</span><span><strong>Critérios de aceite:</strong> Como vamos saber que está pronto?</span></div>
+          <div class="dd-item"><span class="dd-dot">☑️</span><span><strong>Estimativa:</strong> O time entendeu e concordou com o tamanho</span></div>
+          <div class="dd-item"><span class="dd-dot">☑️</span><span><strong>Dependências mapeadas:</strong> Nenhum bloqueio externo não resolvido</span></div>
+          <div class="dd-item"><span class="dd-dot">☑️</span><span><strong>Design/mockup disponível</strong> (quando aplicável)</span></div>
+          <div class="dd-item"><span class="dd-dot">☑️</span><span><strong>Acesso e ambiente garantidos</strong> para desenvolver e testar</span></div>
+          <div style="margin-top:14px;padding:10px 14px;background:rgba(59,130,246,0.08);border-radius:8px;font-size:12px;color:#93c5fd">
+            💡 <strong>Regra prática:</strong> Se alguém vai começar a tarefa e tem alguma dessas perguntas sem resposta, ela não está Ready. Volta para refinamento antes.
+          </div>
+        </div>
+
+        <div style="background:var(--surface);border:1px solid rgba(0,210,160,0.35);border-radius:var(--radius);padding:22px">
+          <div class="do-title" style="color:#34d399">✅ DoD — Definition of Done</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Uma tarefa só vai para Done se:</div>
+          <div class="dd-item"><span class="dd-dot">☑️</span><span><strong>Código em produção</strong> (ou ambiente definido como meta)</span></div>
+          <div class="dd-item"><span class="dd-dot">☑️</span><span><strong>Testes escritos</strong> e passando (unit + integração onde aplicável)</span></div>
+          <div class="dd-item"><span class="dd-dot">☑️</span><span><strong>Code review aprovado</strong> por pelo menos 1 par</span></div>
+          <div class="dd-item"><span class="dd-dot">☑️</span><span><strong>Critérios de aceite validados</strong> — o que foi prometido foi entregue</span></div>
+          <div class="dd-item"><span class="dd-dot">☑️</span><span><strong>Sem regressões</strong> nos fluxos existentes</span></div>
+          <div class="dd-item"><span class="dd-dot">☑️</span><span><strong>Observabilidade</strong>: logs, métricas e alertas configurados</span></div>
+          <div class="dd-item"><span class="dd-dot">☑️</span><span><strong>Documentação atualizada</strong> (quando aplicável — Confluence, README, Swagger)</span></div>
+          <div style="margin-top:14px;padding:10px 14px;background:rgba(0,210,160,0.07);border-radius:8px;font-size:12px;color:#6ee7b7">
+            💡 <strong>Regra prática:</strong> "Done" não é "o dev terminou". É "o valor chegou no usuário ou no sistema final com qualidade verificada".
+          </div>
+        </div>
+      </div>
+
+      <div class="highlight" style="margin-top:24px">
+        <div class="highlight-title">🎯 Por que DoR e DoD importam para o time todo</div>
+        <div class="highlight-body">
+          Quando a <strong>DoR</strong> é respeitada, eliminamos retrabalho por requisito incompleto — uma das maiores fontes de desperdício. Quando a <strong>DoD</strong> é respeitada, eliminamos o "pronto mas não funciona" e as regressões que quebram o que estava funcionando. Esses dois acordos juntos são o principal mecanismo de qualidade que um time ágil tem. <strong>Não são checklist burocrático — são proteção do seu tempo.</strong>
+        </div>
+      </div>
+
+      <!-- ENCERRAMENTO -->
+      <div style="margin-top:32px;background:linear-gradient(135deg,rgba(108,99,255,0.1),rgba(0,210,160,0.07));border:1px solid rgba(108,99,255,0.2);border-radius:var(--radius);padding:28px">
+        <div style="font-size:18px;font-weight:800;color:#fff;margin-bottom:16px;display:flex;align-items:center;gap:10px">
+          🎬 Encerramento — Próximos Passos
+        </div>
+        <div class="three-col">
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">📅 Esta semana</div>
+            <div class="dd-item" style="font-size:12px"><span class="dd-dot">→</span><span>Revisar e corrigir tasks paradas no board</span></div>
+            <div class="dd-item" style="font-size:12px"><span class="dd-dot">→</span><span>Registrar pedidos de suporte pendentes</span></div>
+            <div class="dd-item" style="font-size:12px"><span class="dd-dot">→</span><span>Me contatar se tiver dúvida sobre hora extra</span></div>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">📆 Próximas 2 semanas</div>
+            <div class="dd-item" style="font-size:12px"><span class="dd-dot">→</span><span>1:1 de PDI para quem ainda não teve</span></div>
+            <div class="dd-item" style="font-size:12px"><span class="dd-dot">→</span><span>Aplicar DoR na próxima sessão de refinamento</span></div>
+            <div class="dd-item" style="font-size:12px"><span class="dd-dot">→</span><span>Testar uma ferramenta de IA no dia a dia</span></div>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">🔄 Contínuo</div>
+            <div class="dd-item" style="font-size:12px"><span class="dd-dot">→</span><span>Board atualizado em tempo real</span></div>
+            <div class="dd-item" style="font-size:12px"><span class="dd-dot">→</span><span>Code review em até 24h</span></div>
+            <div class="dd-item" style="font-size:12px"><span class="dd-dot">→</span><span>Dúvidas → me chamem antes de absorver</span></div>
+          </div>
+        </div>
+        <div style="margin-top:20px;padding-top:18px;border-top:1px solid var(--border);font-size:14px;color:#c5c0f0;font-style:italic;line-height:1.7">
+          "Minha expectativa não é perfeição imediata — é direção clara e disposição para melhorar. Obrigado pela presença e pela abertura. Podem contar comigo para o que precisarem."
+        </div>
+      </div>
+    </section>
+
+  </div><!-- /content -->
+
+  <footer>
+    <div class="footer-left">
+      <span class="pp-logo">◈ PicPay</span> &nbsp;·&nbsp; Payments PJ &nbsp;·&nbsp; Team Meeting Guide &nbsp;·&nbsp; Gerado via HubAI Nitro
+    </div>
+    <div style="font-size:12px;color:var(--muted)">60 min · 8 seções · Felipe Dextro</div>
+  </footer>
+</div>
+
+<script>
+  // ── TIMER ──
+  let timerInterval = null;
+  let seconds = 0;
+  let running = false;
+
+  function pad(n) { return n.toString().padStart(2, '0'); }
+
+  function updateDisplay() {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    document.getElementById('timer').textContent = pad(m) + ':' + pad(s);
+    // Cores por tempo
+    const t = document.getElementById('timer');
+    if (seconds < 2700) t.style.color = '#00d2a0';       // < 45min
+    else if (seconds < 3300) t.style.color = '#f59e0b';  // 45-55min
+    else t.style.color = '#ef4444';                       // > 55min
+  }
+
+  function toggleTimer() {
+    const btn = document.getElementById('timer-btn');
+    if (!running) {
+      timerInterval = setInterval(() => { seconds++; updateDisplay(); }, 1000);
+      btn.textContent = '⏸ Pause';
+      btn.classList.add('running');
+      running = true;
+    } else {
+      clearInterval(timerInterval);
+      btn.textContent = '▶ Continuar';
+      btn.classList.remove('running');
+      running = false;
+    }
+  }
+
+  function resetTimer() {
+    clearInterval(timerInterval);
+    seconds = 0;
+    running = false;
+    updateDisplay();
+    const btn = document.getElementById('timer-btn');
+    btn.textContent = '▶ Start';
+    btn.classList.remove('running');
+    document.getElementById('timer').style.color = '#00d2a0';
+  }
+
+  // ── NAV ACTIVE ──
+  function setActive(el) {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    updateProgress();
+  }
+
+  const sections = ['abertura','horas','tarefas','suporte','pdi','engenharia','ai-first','dor-dod'];
+  const visited = new Set();
+
+  function updateProgress() {
+    const pct = Math.round((visited.size / sections.length) * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-label').textContent = visited.size + ' / ' + sections.length + ' seções';
+  }
+
+  // Intersection Observer para marcar seções visitadas
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        visited.add(e.target.id);
+        updateProgress();
+        // Destacar nav item
+        document.querySelectorAll('.nav-item').forEach(nav => {
+          if (nav.getAttribute('href') === '#' + e.target.id) {
+            nav.classList.add('active');
+          } else {
+            nav.classList.remove('active');
+          }
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+</script>
+</body>
+</html>
