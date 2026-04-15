@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Team Meeting — Payments PJ</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22253a;
+    --border: #2e3250;
+    --accent: #6c63ff;
+    --accent2: #00d2a0;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --blue: #3b82f6;
+    --pink: #ec4899;
+    --text: #e8eaf6;
+    --muted: #8a8fb5;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; color: var(--text); }
+
+  /* ── DECK ── */
+  .deck { width: 100%; height: 100vh; position: relative; }
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    opacity: 0; pointer-events: none;
+    transition: opacity .4s ease, transform .4s ease;
+    transform: translateX(40px);
+    overflow: hidden;
+  }
+  .slide.active {
+    opacity: 1; pointer-events: all; transform: translateX(0);
+  }
+  .slide.prev {
+    opacity: 0; transform: translateX(-40px);
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    height: 56px; background: rgba(26,29,39,0.95); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 40px; flex-shrink: 0; backdrop-filter: blur(10px);
+    position: relative; z-index: 10;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 16px; }
+  .topbar-logo { font-size: 13px; font-weight: 800; color: var(--accent); }
+  .topbar-sep { width: 1px; height: 20px; background: var(--border); }
+  .slide-label { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .topbar-right { display: flex; align-items: center; gap: 16px; }
+  .slide-counter { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .timer-pill {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 20px;
+    padding: 4px 14px; font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums;
+    color: var(--accent2); cursor: pointer; transition: border-color .15s;
+  }
+  .timer-pill:hover { border-color: var(--accent2); }
+  .timer-pill.warn { color: var(--yellow); border-color: rgba(245,158,11,0.4); }
+  .timer-pill.danger { color: var(--red); border-color: rgba(239,68,68,0.4); }
+
+  /* ── PROGRESS BAR ── */
+  .progress-track {
+    height: 3px; background: var(--surface2); position: relative; flex-shrink: 0;
+  }
+  .progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width .4s ease; border-radius: 0 2px 2px 0;
+  }
+
+  /* ── CONTENT AREA ── */
+  .slide-body {
+    flex: 1; display: flex; flex-direction: column; justify-content: center;
+    padding: 40px 80px; overflow: hidden; position: relative;
+  }
+
+  /* ── COVER SLIDE ── */
+  .slide-cover {
+    background: radial-gradient(ellipse at 70% 50%, rgba(108,99,255,0.18) 0%, transparent 60%),
+                radial-gradient(ellipse at 20% 80%, rgba(0,210,160,0.1) 0%, transparent 50%),
+                var(--bg);
+    justify-content: center; align-items: flex-start;
+  }
+  .cover-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(108,99,255,0.15); border: 1px solid rgba(108,99,255,0.3);
+    border-radius: 20px; padding: 6px 18px; font-size: 12px; font-weight: 700;
+    color: #a99fff; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 24px;
+  }
+  .cover-title {
+    font-size: clamp(40px, 6vw, 72px); font-weight: 900; line-height: 1.1;
+    letter-spacing: -2px; color: #fff; margin-bottom: 20px;
+  }
+  .cover-title span { color: var(--accent); }
+  .cover-subtitle { font-size: 18px; color: var(--muted); max-width: 560px; line-height: 1.6; margin-bottom: 40px; }
+  .cover-meta { display: flex; gap: 20px; flex-wrap: wrap; }
+  .cover-meta-item {
+    display: flex; align-items: center; gap: 10px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 10px; padding: 12px 20px;
+  }
+  .cmi-icon { font-size: 20px; }
+  .cmi-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .cmi-val { font-size: 14px; font-weight: 700; color: #fff; }
+  .cover-accent-line {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), transparent);
+  }
+
+  /* ── SECTION DIVIDER ── */
+  .slide-divider {
+    justify-content: center; align-items: center; text-align: center;
+  }
+  .divider-num {
+    font-size: clamp(100px, 18vw, 180px); font-weight: 900; line-height: 1;
+    opacity: 0.06; position: absolute; left: 50%; transform: translateX(-50%);
+    letter-spacing: -10px; user-select: none;
+  }
+  .divider-icon { font-size: 56px; margin-bottom: 20px; position: relative; z-index: 1; }
+  .divider-badge {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+    padding: 4px 16px; border-radius: 20px; margin-bottom: 16px; display: inline-block;
+    position: relative; z-index: 1;
+  }
+  .divider-title {
+    font-size: clamp(32px, 5vw, 60px); font-weight: 900; letter-spacing: -2px; color: #fff;
+    position: relative; z-index: 1; margin-bottom: 12px;
+  }
+  .divider-sub { font-size: 18px; color: var(--muted); position: relative; z-index: 1; }
+  .divider-time {
+    margin-top: 24px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 20px; display: inline-flex; align-items: center;
+    gap: 8px; font-size: 14px; font-weight: 700; position: relative; z-index: 1;
+  }
+
+  /* ── CONTENT SLIDES ── */
+  .slide-title {
+    font-size: clamp(28px, 3.5vw, 46px); font-weight: 900; letter-spacing: -1.5px;
+    color: #fff; margin-bottom: 8px; line-height: 1.1;
+  }
+  .slide-subtitle { font-size: 15px; color: var(--muted); margin-bottom: 32px; }
+
+  /* GRID LAYOUTS */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+
+  /* CARDS */
+  .s-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px; transition: border-color .2s;
+  }
+  .s-card:hover { border-color: rgba(108,99,255,0.4); }
+  .s-card-icon { font-size: 28px; margin-bottom: 12px; }
+  .s-card-title { font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 8px; }
+  .s-card-body { font-size: 13px; color: var(--muted); line-height: 1.65; }
+  .s-card-body strong { color: var(--text); }
+
+  /* ALERT */
+  .s-alert {
+    display: flex; gap: 14px; padding: 18px 22px; border-radius: 12px; border-left: 4px solid;
+    font-size: 14px; line-height: 1.65; margin-bottom: 14px;
+  }
+  .s-alert-icon { font-size: 20px; flex-shrink: 0; }
+  .s-alert.red { background: rgba(239,68,68,0.08); border-color: var(--red); color: #fca5a5; }
+  .s-alert.red strong { color: #fff; }
+  .s-alert.yellow { background: rgba(245,158,11,0.08); border-color: var(--yellow); color: #fcd34d; }
+  .s-alert.yellow strong { color: #fff; }
+  .s-alert.green { background: rgba(0,210,160,0.07); border-color: var(--accent2); color: #6ee7b7; }
+  .s-alert.green strong { color: #fff; }
+  .s-alert.blue { background: rgba(59,130,246,0.08); border-color: var(--blue); color: #93c5fd; }
+  .s-alert.blue strong { color: #fff; }
+  .s-alert.purple { background: rgba(108,99,255,0.08); border-color: var(--accent); color: #c4b5fd; }
+  .s-alert.purple strong { color: #fff; }
+
+  /* DO/DONT */
+  .do-block { background: var(--surface); border: 1px solid rgba(0,210,160,0.3); border-radius: 14px; padding: 22px; }
+  .dont-block { background: var(--surface); border: 1px solid rgba(239,68,68,0.3); border-radius: 14px; padding: 22px; }
+  .dd-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+  .dd-item { display: flex; gap: 10px; margin-bottom: 10px; font-size: 13px; color: #c8d0e8; line-height: 1.5; }
+  .dd-item:last-child { margin-bottom: 0; }
+  .dd-bullet { flex-shrink: 0; }
+
+  /* LIST */
+  .s-list { list-style: none; }
+  .s-list li {
+    display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px solid rgba(46,50,80,0.4);
+    font-size: 14px; align-items: flex-start; line-height: 1.5;
+  }
+  .s-list li:last-child { border-bottom: none; }
+  .s-list li .bullet { font-size: 18px; flex-shrink: 0; margin-top: -1px; }
+  .s-list li strong { color: #fff; }
+  .s-list li span { color: var(--muted); }
+
+  /* BIG QUOTE */
+  .big-quote {
+    font-size: clamp(20px, 2.5vw, 30px); font-style: italic; color: #c5c0f0;
+    line-height: 1.5; border-left: 4px solid var(--accent);
+    padding-left: 28px; max-width: 800px;
+  }
+
+  /* HIGHLIGHT */
+  .s-highlight {
+    background: linear-gradient(135deg, rgba(108,99,255,0.12), rgba(0,210,160,0.07));
+    border: 1px solid rgba(108,99,255,0.25); border-radius: 14px; padding: 28px;
+  }
+  .s-highlight-title { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+  .s-highlight-body { font-size: 14px; color: #c5c0f0; line-height: 1.7; }
+
+  /* FLOW */
+  .flow-wrap { display: flex; align-items: center; gap: 0; }
+  .flow-step { display: flex; flex-direction: column; align-items: center; flex: 1; }
+  .flow-step:not(:last-child) { position: relative; }
+  .flow-step:not(:last-child)::after {
+    content: '→'; position: absolute; right: -10px; top: 14px;
+    color: var(--muted); font-size: 18px; z-index: 1;
+  }
+  .flow-bub {
+    width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-size: 18px; margin-bottom: 8px; border: 2px solid;
+  }
+  .flow-lbl { font-size: 11px; color: var(--muted); text-align: center; font-weight: 600; line-height: 1.3; }
+  .flow-sub { font-size: 10px; color: #3a3d5a; text-align: center; margin-top: 2px; }
+
+  /* TABLE */
+  .s-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .s-table th { text-align: left; padding: 10px 16px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); border-bottom: 1px solid var(--border); background: var(--surface2); font-weight: 700; }
+  .s-table td { padding: 11px 16px; border-bottom: 1px solid rgba(46,50,80,0.4); vertical-align: middle; }
+  .s-table tr:last-child td { border-bottom: none; }
+  .s-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+
+  /* PILLS */
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .pill-red { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+  .pill-green { background: rgba(0,210,160,0.12); color: #34d399; border: 1px solid rgba(0,210,160,0.25); }
+  .pill-yellow { background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.25); }
+  .pill-blue { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.25); }
+  .pill-purple { background: rgba(108,99,255,0.15); color: #a78bfa; border: 1px solid rgba(108,99,255,0.3); }
+
+  /* METRIC */
+  .metric-row { display: flex; gap: 16px; }
+  .metric-box { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
+  .metric-num { font-size: 48px; font-weight: 900; line-height: 1; margin-bottom: 6px; }
+  .metric-lbl { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .metric-sub { font-size: 11px; color: #3a3d5a; margin-top: 4px; }
+
+  /* CHECKLIST ITEM */
+  .check-item { display: flex; gap: 14px; padding: 13px 0; border-bottom: 1px solid rgba(46,50,80,0.35); align-items: flex-start; }
+  .check-item:last-child { border-bottom: none; }
+  .check-box { width: 22px; height: 22px; border: 2px solid var(--border); border-radius: 6px; flex-shrink: 0; margin-top: 1px; }
+  .check-item strong { color: #fff; font-size: 14px; }
+  .check-item span { color: var(--muted); font-size: 13px; }
+
+  /* ── NAV ── */
+  .nav-controls {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 10px; z-index: 100;
+    background: rgba(26,29,39,0.92); border: 1px solid var(--border);
+    border-radius: 40px; padding: 8px 16px; backdrop-filter: blur(12px);
+  }
+  .nav-btn {
+    width: 36px; height: 36px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--text); font-size: 14px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+  }
+  .nav-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .nav-dots { display: flex; gap: 5px; align-items: center; padding: 0 6px; }
+  .nav-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--border); cursor: pointer;
+    transition: all .2s;
+  }
+  .nav-dot.active { width: 20px; border-radius: 3px; background: var(--accent); }
+  .nav-dot.section { background: var(--surface2); border: 1px solid var(--border); }
+  .nav-hint { font-size: 10px; color: var(--muted); padding: 0 4px; }
+
+  /* ── KEYBOARD HINT ── */
+  .key-hint {
+    position: fixed; bottom: 28px; right: 32px; font-size: 11px; color: #3a3d5a;
+    display: flex; gap: 8px; align-items: center;
+  }
+  .key { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 2px 7px; font-size: 11px; }
+
+  /* ── BG DECORATIONS ── */
+  .bg-glow {
+    position: absolute; border-radius: 50%; pointer-events: none; filter: blur(80px); opacity: 0.12;
+  }
+
+  /* ── AI BADGE ── */
+  .ai-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(135deg, rgba(108,99,255,0.2), rgba(0,210,160,0.1));
+    border: 1px solid rgba(108,99,255,0.4); border-radius: 6px;
+    padding: 3px 12px; font-size: 12px; font-weight: 700; color: #a99fff;
+  }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- ════════════ SLIDE 1 — CAPA ════════════ -->
+  <div class="slide slide-cover active" data-section="Capa">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="topbar-logo">◈ Payments PJ</span>
+        <div class="topbar-sep"></div>
+        <span class="slide-label">Team Meeting</span>
+      </div>
+      <div class="topbar-right">
+        <span class="slide-counter" id="slide-counter">1 / 20</span>
+        <span class="timer-pill" id="timer" onclick="toggleTimer()">00:00</span>
+      </div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progress" style="width:5%"></div></div>
+    <div class="slide-body" style="padding:60px 100px">
+      <div class="bg-glow" style="width:500px;height:500px;background:var(--accent);top:-100px;right:-100px"></div>
+      <div class="bg-glow" style="width:400px;height:400px;background:var(--accent2);bottom:-100px;left:200px"></div>
+      <div class="cover-eyebrow">📅 Payments PJ · Serviços Financeiros PJ</div>
+      <div class="cover-title">Team Meeting<br/><span>Alinhamentos &</span><br/><span style="color:var(--accent2)">Boas Práticas</span></div>
+      <div class="cover-subtitle">Temas operacionais, cultura de engenharia e próximos passos para o time.</div>
+      <div class="cover-meta">
+        <div class="cover-meta-item"><span class="cmi-icon">⏱️</span><div><div class="cmi-label">Duração</div><div class="cmi-val">60 minutos</div></div></div>
+        <div class="cover-meta-item"><span class="cmi-icon">👥</span><div><div class="cmi-label">Audiência</div><div class="cmi-val">Todo o time</div></div></div>
+        <div class="cover-meta-item"><span class="cmi-icon">🎯</span><div><div class="cmi-label">Foco</div><div class="cmi-val">Alinhar · Orientar · Engajar</div></div></div>
+      </div>
+    </div>
+    <div class="cover-accent-line"></div>
+  </div>
+
+  <!-- ════════════ SLIDE 2 — AGENDA ════════════ -->
+  <div class="slide" data-section="Agenda">
+    <div class="topbar"><div class="topbar-left"><span class="topbar-logo">◈ Payments PJ</span><div class="topbar-sep"></div><span class="slide-label">Agenda</span></div><div class="topbar-right"><span class="slide-counter" id="slide-counter"></span><span class="timer-pill" id="timer"></span></div></div>
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <div class="slide-body">
+      <div class="slide-title">O que vamos cobrir hoje</div>
+      <div class="slide-subtitle">60 minutos · 8 tópicos</div>
+      <div class="grid-2" style="gap:14px">
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">⚠️ Temas Latentes · 30 min</div>
+          <div class="s-list">
+            <li><span class="bullet">⏰</span><div><strong>Gestão de Horas</strong><span> — hora extra, interjornada, deploy</span></div></li>
+            <li><span class="bullet">📋</span><div><strong>Gestão de Tarefas</strong><span> — board correto, WIP, flags</span></div></li>
+            <li><span class="bullet">🎧</span><div><strong>Pedidos de Suporte</strong><span> — triagem, registro, SLA</span></div></li>
+            <li><span class="bullet">🌱</span><div><strong>PDI</strong><span> — plano de desenvolvimento individual</span></div></li>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">✨ Boas Práticas · 25 min</div>
+          <div class="s-list">
+            <li><span class="bullet">⚙️</span><div><strong>Engenharia de Software</strong><span> — princípios e qualidade</span></div></li>
+            <li><span class="bullet">🤖</span><div><strong>AI First</strong><span> — desenvolvimento assistido por IA</span></div></li>
+            <li><span class="bullet">✅</span><div><strong>DoR &amp; DoD</strong><span> — contratos de qualidade do time</span></div></li>
+          </div>
+          <div style="margin-top:16px">
+            <div class="s-alert purple">
+              <span class="s-alert-icon">💬</span>
+              <div>Essa é uma <strong>conversa</strong>, não uma palestra. Interrompam quando quiserem.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ SLIDE 3 — DIVISOR HORAS ════════════ -->
+  <div class="slide slide-divider" data-section="Gestão de Horas">
+    <div class="topbar"><div class="topbar-left"><span class="topbar-logo">◈ Payments PJ</span><div class="topbar-sep"></div><span class="slide-label">Gestão de Horas</span></div><div class="topbar-right"><span class="slide-counter"></span><span class="timer-pill" id="timer"></span></div></div>
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <div class="slide-body" style="justify-content:center;align-items:center;text-align:center">
+      <div class="bg-glow" style="width:400px;height:400px;background:var(--red);top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+      <div class="divider-num" style="color:var(--red)">01</div>
+      <div class="divider-icon">⏰</div>
+      <div class="divider-badge" style="background:rgba(239,68,68,0.12);color:#f87171;border:1px solid rgba(239,68,68,0.2)">Temas Latentes</div>
+      <div class="divider-title">Gestão de Horas</div>
+      <div class="divider-sub">Hora extra · Interjornada · Deploy fora do horário</div>
+      <div class="divider-time"><span>⏱️</span> 10 minutos</div>
+    </div>
+  </div>
+
+  <!-- ════════════ SLIDE 4 — HORAS: REGRAS ════════════ -->
+  <div class="slide" data-section="Gestão de Horas">
+    <div class="topbar"><div class="topbar-left"><span class="topbar-logo">◈ Payments PJ</span><div class="topbar-sep"></div><span class="slide-label">Gestão de Horas</span></div><div class="topbar-right"><span class="slide-counter"></span><span class="timer-pill" id="timer"></span></div></div>
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <div class="slide-body">
+      <div class="slide-title">Como funciona de verdade</div>
+      <div class="slide-subtitle">Regras que protegem vocês — e a empresa</div>
+      <div class="grid-2">
+        <div>
+          <div class="s-list">
+            <li><span class="bullet">🚨</span><div><strong>Hora extra exige aprovação prévia</strong><span> — nunca posterior. Comunique ao gestor antes de estender o horário.</span></div></li>
+            <li><span class="bullet">⚖️</span><div><strong>Interjornada mínima de 11h</strong><span> — CLT, Art. 66. Saiu às 22h? Não pode ser acionado antes das 9h do dia seguinte.</span></div></li>
+            <li><span class="bullet">🚀</span><div><strong>Deploy não justifica entrar cedo</strong><span> — deploy às 7h = hora extra ou reorganização de jornada. Não é "favor ao time".</span></div></li>
+            <li><span class="bullet">📝</span><div><strong>Acionamento fora do horário gera compensação</strong><span> — documente e comunique. Se não está registrado, não existe.</span></div></li>
+          </div>
+        </div>
+        <div>
+          <div class="metric-row" style="margin-bottom:16px">
+            <div class="metric-box"><div class="metric-num" style="color:var(--red)">11h</div><div class="metric-lbl">Interjornada mínima</div><div class="metric-sub">CLT · obrigatório</div></div>
+            <div class="metric-box"><div class="metric-num" style="color:var(--yellow)">2h</div><div class="metric-lbl">Máx. hora extra/dia</div><div class="metric-sub">com acordo e aprovação</div></div>
+          </div>
+          <div class="s-alert yellow">
+            <span class="s-alert-icon">⚠️</span>
+            <div><strong>Mensagem:</strong> Se a demanda exige mais horas, o problema está no planejamento — e aí eu preciso saber para ajustar. <strong>Não resolvam sozinhos absolvendo sobrecarga em silêncio.</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ SLIDE 5 — HORAS: DO/DONT ════════════ -->
+  <div class="slide" data-section="Gestão de Horas">
+    <div class="topbar"><div class="topbar-left"><span class="topbar-logo">◈ Payments PJ</span><div class="topbar-sep"></div><span class="slide-label">Gestão de Horas</span></div><div class="topbar-right"><span class="slide-counter"></span><span class="timer-pill" id="timer"></span></div></div>
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <div class="slide-body">
+      <div class="slide-title">O que fazer — e o que não fazer</div>
+      <div class="slide-subtitle">Deixa claro para todo mundo</div>
+      <div class="grid-2" style="margin-top:8px">
+        <div class="dont-block">
+          <div class="dd-title" style="color:var(--red)">❌ Não fazer</div>
+          <div class="dd-item"><span class="dd-bullet">●</span><span>Trabalhar além do horário sem comunicar ao gestor</span></div>
+          <div class="dd-item"><span class="dd-bullet">●</span><span>Entrar cedo "pra ajudar no deploy" sem registro</span></div>
+          <div class="dd-item"><span class="dd-bullet">●</span><span>Responder chamado às 23h sem anotar o acionamento</span></div>
+          <div class="dd-item"><span class="dd-bullet">●</span><span>Assumir que o gestor "já sabe" que você trabalhou extra</span></div>
+          <div class="dd-item"><span class="dd-bullet">●</span><span>Absorver sobrecarga em silêncio por "sentido de equipe"</span></div>
+        </div>
+        <div class="do-block">
+          <div class="dd-title" style="color:var(--accent2)">✅ Sempre fazer</div>
+          <div class="dd-item"><span class="dd-bullet">●</span><span>Comunicar ao gestor <strong>antes</strong> de qualquer extensão de jornada</span></div>
+          <div class="dd-item"><span class="dd-bullet">●</span><span>Registrar todo acionamento fora do horário (hora, motivo, duração)</span></div>
+          <div class="dd-item"><span class="dd-bullet">●</span><span>Planejar deploys críticos dentro do horário comercial</span></div>
+          <div class="dd-item"><span class="dd-bullet">●</span><span>Usar banco de horas quando aplicável e combinado</span></div>
+          <div class="dd-item"><span class="dd-bullet">●</span><span>Se o volume de demanda é insustentável → me falar</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ SLIDE 6 — DIVISOR TAREFAS ════════════ -->
+  <div class="slide slide-divider" data-section="Gestão de Tarefas">
+    <div class="topbar"><div class="topbar-left"><span class="topbar-logo">◈ Payments PJ</span><div class="topbar-sep"></div><span class="slide-label">Gestão de Tarefas</span></div><div class="topbar-right"><span class="slide-counter"></span><span class="timer-pill" id="timer"></span></div></div>
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <div class="slide-body" style="justify-content:center;align-items:center;text-align:center">
+      <div class="bg-glow" style="width:400px;height:400px;background:var(--yellow);top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+      <div class="divider-num" style="color:var(--yellow)">02</div>
+      <div class="divider-icon">📋</div>
+      <div class="divider-badge" style="background:rgba(245,158,11,0.12);color:#fbbf24;border:1px solid rgba(245,158,11,0.2)">Temas Latentes</div>
+      <div class="divider-title">Gestão de Tarefas</div>
+      <div class="divider-sub">Board correto · WIP · Flags de impedimento</div>
+      <div class="divider-time"><span>⏱️</span> 8 minutos</div>
+    </div>
+  </div>
+
+  <!-- ════════════ SLIDE 7 — TAREFAS: FLUXO ════════════ -->
+  <div class="slide" data-section="Gestão de Tarefas">
+    <div class="topbar"><div class="topbar-left"><span class="topbar-logo">◈ Payments PJ</span><div class="topbar-sep"></div><span class="slide-label">Gestão de Tarefas</span></div><div class="topbar-right"><span class="slide-counter"></span><span class="timer-pill" id="timer"></span></div></div>
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <div class="slide-body">
+      <div class="slide-title">Fluxo correto no board</div>
+      <div class="slide-subtitle">Cada coluna tem um significado preciso</div>
+      <div class="flow-wrap" style="margin:28px 0 24px">
+        <div class="flow-step"><div class="flow-bub" style="background:rgba(99,102,241,0.15);border-color:#6366f1">📥</div><div class="flow-lbl">Backlog</div><div class="flow-sub">Refinada</div></div>
+        <div class="flow-step"><div class="flow-bub" style="background:rgba(59,130,246,0.15);border-color:#3b82f6">🎯</div><div class="flow-lbl">Ready to Dev</div><div class="flow-sub">DoR ok</div></div>
+        <div class="flow-step"><div class="flow-bub" style="background:rgba(245,158,11,0.15);border-color:#f59e0b">⚒️</div><div class="flow-lbl">In Dev</div><div class="flow-sub">Ao iniciar ▶</div></div>
+        <div class="flow-step"><div class="flow-bub" style="background:rgba(168,85,247,0.15);border-color:#a855f7">👀</div><div class="flow-lbl">Code Review</div><div class="flow-sub">PR aberto</div></div>
+        <div class="flow-step"><div class="flow-bub" style="background:rgba(236,72,153,0.15);border-color:#ec4899">🧪</div><div class="flow-lbl">In Test</div><div class="flow-sub">Validação</div></div>
+        <div class="flow-step"><div class="flow-bub" style="background:rgba(34,197,94,0.15);border-color:#22c55e">🚀</div><div class="flow-lbl">Ready Deploy</div><div class="flow-sub">Aprovado</div></div>
+        <div class="flow-step"><div class="flow-bub" style="background:rgba(0,210,160,0.15);border-color:#00d2a0">✅</div><div class="flow-lbl">Done</div><div class="flow-sub">Em produção</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="s-alert red">
+          <span class="s-alert-icon">🚨</span>
+          <div><strong>Problema atual:</strong> Tarefas ficam no Backlog enquanto o dev já começou. Board ≠ realidade = Cycle Time errado = dados que não protegem o time.</div>
+        </div>
+        <div class="s-alert blue">
+          <span class="s-alert-icon">📊</span>
+          <div><strong>Por que importa para você:</strong> Board correto = dados que mostram sua velocidade real e onde o time precisa de apoio. É o que me permite defender o time com a liderança.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ SLIDE 8 — TAREFAS: REGRAS ════════════ -->
+  <div class="slide" data-section="Gestão de Tarefas">
+    <div class="topbar"><div class="topbar-left"><span class="topbar-logo">◈ Payments PJ</span><div class="topbar-sep"></div><span class="slide-label">Gestão de Tarefas</span></div><div class="topbar-right"><span class="slide-counter"></span><span class="timer-pill" id="timer"></span></div></div>
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <div class="slide-body">
+      <div class="slide-title">As 5 regras de ouro do board</div>
+      <div class="slide-subtitle">Simples e não negociáveis</div>
+      <div class="s-list" style="margin-top:8px">
+        <li><span class="bullet" style="color:var(--yellow)">1</span><div><strong>Mover ao iniciar</strong><span> — assim que você tocou na tarefa, ela vai para In Development. Não "quando terminar o contexto anterior".</span></div></li>
+        <li><span class="bullet" style="color:var(--yellow)">2</span><div><strong>Um item por vez</strong><span> — WIP alto é um sintoma de problema, não uma demonstração de esforço. Foco gera velocidade.</span></div></li>
+        <li><span class="bullet" style="color:var(--yellow)">3</span><div><strong>PR aberto → Waiting Code Review imediatamente</strong><span> — sem gap entre essas duas coisas.</span></div></li>
+        <li><span class="bullet" style="color:var(--yellow)">4</span><div><strong>Flag de impedimento se bloqueado</strong><span> — não avança, mas fica visível. Sem flag = gestor não sabe = não pode agir. Com flag = pode destravar em horas.</span></div></li>
+        <li><span class="bullet" style="color:var(--yellow)">5</span><div><strong>Done = em produção</strong><span> — não "o dev terminou". Apenas fechar quando o valor chegou no ambiente final e validado.</span></div></li>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ SLIDE 9 — DIVISOR SUPORTE ════════════ -->
+  <div class="slide slide-divider" data-section="Suporte">
+    <div class="topbar"><div class="topbar-left"><span class="topbar-logo">◈ Payments PJ</span><div class="topbar-sep"></div><span class="slide-label">Pedidos de Suporte</span></div><div class="topbar-right"><span class="slide-counter"></span><span class="timer-pill" id="timer"></span></div></div>
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <div class="slide-body" style="justify-content:center;align-items:center;text-align:center">
+      <div class="bg-glow" style="width:400px;height:400px;background:var(--blue);top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+      <div class="divider-num" style="color:var(--blue)">03</div>
+      <div class="divider-icon">🎧</div>
+      <div class="divider-badge" style="background:rgba(59,130,246,0.12);color:#60a5fa;border:1px solid rgba(59,130,246,0.2)">Temas Latentes</div>
+      <div class="divider-title">Pedidos de Suporte</div>
+      <div class="divider-sub">Triagem · Registro obrigatório · SLA</div>
+      <div class="divider-time"><span>⏱️</span> 7 minutos</div>
+    </div>
+  </div>
+
+  <!-- ════════════ SLIDE 10 — SUPORTE ════════════ -->
+  <div class="slide" data-section="Suporte">
+    <div class="topbar"><div class="topbar-left"><span class="topbar-logo">◈ Payments PJ</span><div class="topbar-sep"></div><span class="slide-label">Pedidos de Suporte</span></div><div class="topbar-right"><span class="slide-counter"></span><span class="timer-pill" id="timer"></span></div></div>
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <div class="slide-body">
+      <div class="slide-title">Suporte invisível custa caro</div>
+      <div class="slide-subtitle">Se não está no board, não existe para o planejamento</div>
+      <div class="grid-2">
+        <div>
+          <div class="s-alert yellow" style="margin-bottom:16px">
+            <span class="s-alert-icon">⚠️</span>
+            <div><strong>Problema atual:</strong> Pedidos chegam por Slack, DM, mesa — resolvidos sem registro. Isso invisibiliza o custo real de suporte e impede melhorias sistêmicas.</div>
+          </div>
+          <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:12px">📥 Todo pedido → issue no Jira</div>
+          <div class="s-list">
+            <li><span class="bullet">🐛</span><div><strong>Bug</strong><span> → Issue tipo Problema</span></div></li>
+            <li><span class="bullet">❓</span><div><strong>Dúvida operacional</strong><span> → Issue tipo Support</span></div></li>
+            <li><span class="bullet">✨</span><div><strong>Melhoria</strong><span> → Refinamento no próximo ciclo</span></div></li>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:12px">⏱️ SLA interno</div>
+          <div class="metric-row" style="margin-bottom:14px">
+            <div class="metric-box"><div style="font-size:22px;font-weight:900;color:var(--red);margin-bottom:4px">P1</div><div class="metric-lbl">Produção parada</div><div class="metric-sub">Acionamento imediato</div></div>
+            <div class="metric-box"><div style="font-size:22px;font-weight:900;color:var(--yellow);margin-bottom:4px">P2</div><div class="metric-lbl">Degradado</div><div class="metric-sub">Mesmo dia</div></div>
+            <div class="metric-box"><div style="font-size:22px;font-weight:900;color:var(--blue);margin-bottom:4px">P3</div><div class="metric-lbl">Dúvida/melhoria</div><div class="metric-sub">Próxima sprint</div></div>
+          </div>
+          <div class="s-alert purple">
+            <span class="s-alert-icon">🔁</span>
+            <div><strong>Regra:</strong> Mesmo tipo de suporte apareceu 3x? Vire uma história de melhoria. Não resolva o sintoma infinitamente.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ SLIDE 11 — DIVISOR PDI ════════════ -->
+  <div class="slide slide-divider" data-section="PDI">
+    <div class="topbar"><div class="topbar-left"><span class="topbar-logo">◈ Payments PJ</span><div class="topbar-sep"></div><span class="slide-label">PDI</span></div><div class="topbar-right"><span class="slide-counter"></span><span class="timer-pill" id="timer"></span></div></div>
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <div class="slide-body" style="justify-content:center;align-items:center;text-align:center">
+      <div class="bg-glow" style="width:400px;height:400px;background:var(--accent2);top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+      <div class="divider-num" style="color:var(--accent2)">04</div>
+      <div class="divider-icon">🌱</div>
+      <div class="divider-badge" style="background:rgba(0,210,160,0.1);color:#34d399;border:1px solid rgba(0,210,160,0.2)">Temas Latentes</div>
+      <div class="divider-title">PDI</div>
+      <div class="divider-sub">Plano de Desenvolvimento Individual</div>
+      <div class="divider-time"><span>⏱️</span> 5 minutos</div>
+    </div>
+  </div>
+
+  <!-- ════════════ SLIDE 12 — PDI ════════════ -->
+  <div class="slide" data-section="PDI">
+    <div class="topbar"><div class="topbar-left"><span class="topbar-logo">◈ Payments PJ</span><div class="topbar-sep"></div><span class="slide-label">PDI</span></div><div class="topbar-right"><span class="slide-counter"></span><span class="timer-pill" id="timer"></span></div></div>
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <div class="slide-body">
+      <div class="slide-title">Desenvolvimento é responsabilidade compartilhada</div>
+      <div class="slide-subtitle">Minha e sua — sem exceção</div>
+      <div class="grid-2">
+        <div>
+          <div class="s-highlight">
+            <div class="s-highlight-title">🤝 Meu compromisso com vocês</div>
+            <div class="s-highlight-body">Cada pessoa aqui merece um PDI estruturado. Se você ainda não tem ou está desatualizado, quero corrigir isso nas próximas semanas. PDI não é formalidade — é um contrato de desenvolvimento entre nós dois.</div>
+          </div>
+          <div class="s-alert green" style="margin-top:14px">
+            <span class="s-alert-icon">🎯</span>
+            <div><strong>Ação desta semana:</strong> Quem ainda não teve o 1:1 de PDI comigo, me manda mensagem para agendar. Não é opcional.</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:12px">📋 O que um PDI precisa ter</div>
+          <div class="s-list">
+            <li><span class="bullet">📍</span><div><strong>Onde estou hoje</strong><span> — senioridade, skills, pontos da AVD</span></div></li>
+            <li><span class="bullet">🎯</span><div><strong>Onde quero chegar</strong><span> — próximo nível, especialização, liderança</span></div></li>
+            <li><span class="bullet">🗺️</span><div><strong>Como vamos chegar</strong><span> — ações concretas, cursos, projetos, mentoria</span></div></li>
+            <li><span class="bullet">📅</span><div><strong>Quando</strong><span> — marcos trimestrais mensuráveis</span></div></li>
+            <li><span class="bullet">📏</span><div><strong>Como medir</strong><span> — critérios claros de evolução</span></div></li>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ SLIDE 13 — DIVISOR ENGENHARIA ════════════ -->
+  <div class="slide slide-divider" data-section="Engenharia de Software">
+    <div class="topbar"><div class="topbar-left"><span class="topbar-logo">◈ Payments PJ</span><div class="topbar-sep"></div><span class="slide-label">Boas Práticas de Engenharia</span></div><div class="topbar-right"><span class="slide-counter"></span><span class="timer-pill" id="timer"></span></div></div>
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <div class="slide-body" style="justify-content:center;align-items:center;text-align:center">
+      <div class="bg-glow" style="width:400px;height:400px;background:var(--accent);top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+      <div class="divider-num" style="color:var(--accent)">05</div>
+      <div class="divider-icon">⚙️</div>
+      <div class="divider-badge" style="background:rgba(108,99,255,0.15);color:#a99fff;border:1px solid rgba(108,99,255,0.2)">Boas Práticas</div>
+      <div class="divider-title">Engenharia de Software</div>
+      <div class="divider-sub">Clean Code · Testes · SOLID · Observabilidade · Débito Técnico</div>
+      <div class="divider-time"><span>⏱️</span> 10 minutos</div>
+    </div>
+  </div>
+
+  <!-- ════════════ SLIDE 14 — ENGENHARIA ════════════ -->
+  <div class="slide" data-section="Engenharia de Software">
+    <div class="topbar"><div class="topbar-left"><span class="topbar-logo">◈ Payments PJ</span><div class="topbar-sep"></div><span class="slide-label">Engenharia de Software</span></div><div class="topbar-right"><span class="slide-counter"></span><span class="timer-pill" id="timer"></span></div></div>
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <div class="slide-body">
+      <div class="slide-title">Princípios que fazem a diferença</div>
+      <div class="slide-subtitle">Entregar vs. entregar bem</div>
+      <div class="grid-3" style="margin-top:8px">
+        <div class="s-card" style="border-color:rgba(99,102,241,0.3)">
+          <div class="s-card-icon">🧹</div>
+          <div class="s-card-title">Clean Code</div>
+          <div class="s-card-body">Código que você escreve hoje é lido amanhã — talvez por você em 6 meses. <strong>Nomes claros, funções coesas.</strong> O código deve se auto-documentar.</div>
+        </div>
+        <div class="s-card" style="border-color:rgba(245,158,11,0.3)">
+          <div class="s-card-icon">🧪</div>
+          <div class="s-card-title">Testes não são opcionais</div>
+          <div class="s-card-body">Sem testes, você está <strong>empurrando o risco para produção</strong>. Se não consegue testar, o design provavelmente está errado.</div>
+        </div>
+        <div class="s-card" style="border-color:rgba(0,210,160,0.3)">
+          <div class="s-card-icon">📐</div>
+          <div class="s-card-title">SOLID na prática</div>
+          <div class="s-card-body"><strong>S</strong>ingle Responsibility, <strong>O</strong>pen/Closed, <strong>D</strong>IP. Esses três sozinhos resolvem 80% dos problemas de arquitetura do dia a dia.</div>
+        </div>
+        <div class="s-card" style="border-color:rgba(236,72,153,0.3)">
+          <div class="s-card-icon">🔍</div>
+          <div class="s-card-title">Code Review é trabalho</div>
+          <div class="s-card-body">PR &gt; 24h sem revisão é problema do time, não do autor. <strong>Revisar código é tão importante quanto escrever.</strong></div>
+        </div>
+        <div class="s-card" style="border-color:rgba(59,130,246,0.3)">
+          <div class="s-card-icon">📊</div>
+          <div class="s-card-title">Observabilidade</div>
+          <div class="s-card-body">Toda feature nova: <strong>métricas, logs estruturados, traces</strong>. Sem observabilidade, incidentes em produção viram caça ao tesouro.</div>
+        </div>
+        <div class="s-card" style="border-color:rgba(168,85,247,0.3)">
+          <div class="s-card-icon">⚡</div>
+          <div class="s-card-title">Débito técnico = dívida com juros</div>
+          <div class="s-card-body">Todo débito aceito conscientemente precisa de <strong>issue no board</strong>. Se não está registrado, não existe para o planejamento.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ SLIDE 15 — DIVISOR AI ════════════ -->
+  <div class="slide slide-divider" data-section="AI First">
+    <div class="topbar"><div class="topbar-left"><span class="topbar-logo">◈ Payments PJ</span><div class="topbar-sep"></div><span class="slide-label">AI First</span></div><div class="topbar-right"><span class="slide-counter"></span><span class="timer-pill" id="timer"></span></div></div>
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <div class="slide-body" style="justify-content:center;align-items:center;text-align:center">
+      <div class="bg-glow" style="width:300px;height:300px;background:var(--accent);top:40%;left:30%;transform:translate(-50%,-50%)"></div>
+      <div class="bg-glow" style="width:300px;height:300px;background:var(--accent2);top:60%;left:70%;transform:translate(-50%,-50%)"></div>
+      <div class="divider-num" style="color:var(--accent)">06</div>
+      <div class="divider-icon">🤖</div>
+      <div class="divider-badge" style="background:linear-gradient(135deg,rgba(108,99,255,0.2),rgba(0,210,160,0.1));color:#a99fff;border:1px solid rgba(108,99,255,0.3)">Boas Práticas</div>
+      <div class="divider-title">AI First</div>
+      <div class="divider-sub">Desenvolvimento assistido por IA — amplificação, não substituição</div>
+      <div class="divider-time"><span>⏱️</span> 8 minutos</div>
+    </div>
+  </div>
+
+  <!-- ════════════ SLIDE 16 — AI FIRST ════════════ -->
+  <div class="slide" data-section="AI First">
+    <div class="topbar"><div class="topbar-left"><span class="topbar-logo">◈ Payments PJ</span><div class="topbar-sep"></div><span class="slide-label">AI First</span></div><div class="topbar-right"><span class="slide-counter"></span><span class="timer-pill" id="timer"></span></div></div>
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <div class="slide-body">
+      <div class="slide-title">54% das entregas do time já usam IA</div>
+      <div class="slide-subtitle">Não é tendência — já é realidade no nosso dia a dia</div>
+      <div class="grid-2">
+        <div>
+          <div class="s-alert purple" style="margin-bottom:14px">
+            <span class="s-alert-icon">📊</span>
+            <div>Em março/2026, <strong>70 batches IA + 24 semi-IA</strong> na tribo. Plataforma Pix PJ com <strong>76% de adoção</strong>. Esses são nossos dados reais.</div>
+          </div>
+          <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:12px">🎯 Como usar de forma responsável</div>
+          <div class="s-list">
+            <li><span class="bullet">✍️</span><div><strong>IA como copiloto, não piloto</strong><span> — código gerado precisa ser entendido, revisado e validado por você.</span></div></li>
+            <li><span class="bullet">🔒</span><div><strong>Nunca enviar dados de produção</strong><span> — credenciais, dados de clientes, env vars: fora das IAs externas.</span></div></li>
+            <li><span class="bullet">📚</span><div><strong>Domínio técnico potencializa a IA</strong><span> — quanto mais você conhece, melhores são seus prompts e sua avaliação das respostas.</span></div></li>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:12px">⚡ Onde a IA acelera mais</div>
+          <div class="table-wrap">
+            <table class="s-table">
+              <thead><tr><th>Caso de uso</th><th>Ganho</th></tr></thead>
+              <tbody>
+                <tr><td>Testes unitários</td><td><span class="pill pill-green">Alto</span></td></tr>
+                <tr><td>Documentação e boilerplate</td><td><span class="pill pill-green">Alto</span></td></tr>
+                <tr><td>Code review assistido</td><td><span class="pill pill-yellow">Médio</span></td></tr>
+                <tr><td>Debug e análise de logs</td><td><span class="pill pill-yellow">Médio</span></td></tr>
+                <tr><td>Decisões arquiteturais</td><td><span class="pill pill-red">Baixo — requer contexto</span></td></tr>
+                <tr><td>Regras de negócio complexas</td><td><span class="pill pill-red">Baixo — validação rigorosa</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ SLIDE 17 — DIVISOR DOR/DOD ════════════ -->
+  <div class="slide slide-divider" data-section="DoR & DoD">
+    <div class="topbar"><div class="topbar-left"><span class="topbar-logo">◈ Payments PJ</span><div class="topbar-sep"></div><span class="slide-label">DoR & DoD</span></div><div class="topbar-right"><span class="slide-counter"></span><span class="timer-pill" id="timer"></span></div></div>
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <div class="slide-body" style="justify-content:center;align-items:center;text-align:center">
+      <div class="bg-glow" style="width:400px;height:400px;background:var(--pink);top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+      <div class="divider-num" style="color:var(--pink)">07</div>
+      <div class="divider-icon">✅</div>
+      <div class="divider-badge" style="background:rgba(236,72,153,0.12);color:#f472b6;border:1px solid rgba(236,72,153,0.2)">Boas Práticas</div>
+      <div class="divider-title">DoR &amp; DoD</div>
+      <div class="divider-sub">Definition of Ready · Definition of Done</div>
+      <div class="divider-time"><span>⏱️</span> 7 minutos</div>
+    </div>
+  </div>
+
+  <!-- ════════════ SLIDE 18 — DOR/DOD ════════════ -->
+  <div class="slide" data-section="DoR & DoD">
+    <div class="topbar"><div class="topbar-left"><span class="topbar-logo">◈ Payments PJ</span><div class="topbar-sep"></div><span class="slide-label">DoR & DoD</span></div><div class="topbar-right"><span class="slide-counter"></span><span class="timer-pill" id="timer"></span></div></div>
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <div class="slide-body">
+      <div class="slide-title">Os contratos de qualidade do time</div>
+      <div class="slide-subtitle">A diferença entre começar certo e terminar de verdade</div>
+      <div class="grid-2">
+        <div style="background:var(--surface);border:1px solid rgba(59,130,246,0.35);border-radius:14px;padding:22px">
+          <div class="dd-title" style="color:#60a5fa">📥 DoR — Definition of Ready</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Entra em Dev somente se:</div>
+          <div class="check-item"><div class="check-box"></div><div><strong>Objetivo claro</strong><span> — o quê e por quê descritos</span></div></div>
+          <div class="check-item"><div class="check-box"></div><div><strong>Critérios de aceite</strong><span> — como sabemos que está pronto?</span></div></div>
+          <div class="check-item"><div class="check-box"></div><div><strong>Estimativa acordada</strong><span> — time entendeu o tamanho</span></div></div>
+          <div class="check-item"><div class="check-box"></div><div><strong>Dependências mapeadas</strong><span> — sem bloqueio externo</span></div></div>
+          <div class="check-item"><div class="check-box"></div><div><strong>Acesso e ambiente garantidos</strong></div></div>
+        </div>
+        <div style="background:var(--surface);border:1px solid rgba(0,210,160,0.35);border-radius:14px;padding:22px">
+          <div class="dd-title" style="color:#34d399">✅ DoD — Definition of Done</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Vai para Done somente se:</div>
+          <div class="check-item"><div class="check-box"></div><div><strong>Código em produção</strong><span> — no ambiente definido como meta</span></div></div>
+          <div class="check-item"><div class="check-box"></div><div><strong>Testes escritos e passando</strong></div></div>
+          <div class="check-item"><div class="check-box"></div><div><strong>Code review aprovado</strong><span> — mínimo 1 par</span></div></div>
+          <div class="check-item"><div class="check-box"></div><div><strong>Critérios de aceite validados</strong></div></div>
+          <div class="check-item"><div class="check-box"></div><div><strong>Observabilidade configurada</strong><span> — logs, métricas, alertas</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ SLIDE 19 — PRÓXIMOS PASSOS ════════════ -->
+  <div class="slide" data-section="Próximos Passos">
+    <div class="topbar"><div class="topbar-left"><span class="topbar-logo">◈ Payments PJ</span><div class="topbar-sep"></div><span class="slide-label">Próximos Passos</span></div><div class="topbar-right"><span class="slide-counter"></span><span class="timer-pill" id="timer"></span></div></div>
+    <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+    <div class="slide-body">
+      <div class="slide-title">O que muda a partir de hoje</div>
+      <div class="slide-subtitle">Ações concretas por horizonte de tempo</div>
+      <div class="grid-3">
+        <div class="s-card" style="border-color:rgba(239,68,68,0.3)">
+          <div style="font-size:12px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">📅 Esta semana</div>
+          <div class="dd-item"><span class="dd-bullet" style="color:var(--red)">→</span><span>Revisar e corrigir tasks paradas no board</span></div>
+          <div class="dd-item"><span class="dd-bullet" style="color:var(--red)">→</span><span>Registrar pedidos de suporte pendentes no Jira</span></div>
+          <div class="dd-item"><span class="dd-bullet" style="color:var(--red)">→</span><span>Me contatar se tiver dúvida sobre hora extra ou acionamento</span></div>
+        </div>
+        <div class="s-card" style="border-color:rgba(245,158,11,0.3)">
+          <div style="font-size:12px;font-weight:700;color:var(--yellow);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">📆 Próximas 2 semanas</div>
+          <div class="dd-item"><span class="dd-bullet" style="color:var(--yellow)">→</span><span>1:1 de PDI para quem ainda não teve</span></div>
+          <div class="dd-item"><span class="dd-bullet" style="color:var(--yellow)">→</span><span>Aplicar DoR na próxima sessão de refinamento</span></div>
+          <div class="dd-item"><span class="dd-bullet" style="color:var(--yellow)">→</span><span>Testar uma ferramenta de IA em uma tarefa real</span></div>
+        </div>
+        <div class="s-card" style="border-color:rgba(0,210,160,0.3)">
+          <div style="font-size:12px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">🔄 Contínuo</div>
+          <div class="dd-item"><span class="dd-bullet" style="color:var(--accent2)">→</span><span>Board atualizado em tempo real</span></div>
+          <div class="dd-item"><span class="dd-bullet" style="color:var(--accent2)">→</span><span>Code review em até 24h</span></div>
+          <div class="dd-item"><span class="dd-bullet" style="color:var(--accent2)">→</span><span>Dúvidas → me chamem antes de absorver</span></div>
+        </div>
+      </div>
+      <div class="s-highlight" style="margin-top:20px">
+        <div class="s-highlight-title">💬 Fechamento</div>
+        <div class="s-highlight-body">"Minha expectativa não é perfeição imediata — é direção clara e disposição para melhorar. Obrigado pela presença e pela abertura. Podem contar comigo para o que precisarem."</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ SLIDE 20 — FIM ════════════ -->
+  <div class="slide slide-cover" data-section="Fim" style="justify-content:center;align-items:center;text-align:center">
+    <div class="topbar"><div class="topbar-left"><span class="topbar-logo">◈ Payments PJ</span><div class="topbar-sep"></div><span class="slide-label">Perguntas</span></div><div class="topbar-right"><span class="slide-counter"></span><span class="timer-pill" id="timer"></span></div></div>
+    <div class="progress-track"><div class="progress-fill" id="progress" style="width:100%"></div></div>
+    <div class="slide-body" style="justify-content:center;align-items:center">
+      <div class="bg-glow" style="width:500px;height:500px;background:var(--accent);top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+      <div style="font-size:80px;margin-bottom:24px;position:relative;z-index:1">🙌</div>
+      <div style="font-size:clamp(36px,5vw,64px);font-weight:900;letter-spacing:-2px;color:#fff;margin-bottom:12px;position:relative;z-index:1">Perguntas?</div>
+      <div style="font-size:18px;color:var(--muted);max-width:480px;position:relative;z-index:1;line-height:1.6;margin-bottom:32px">Esse foi o espaço de vocês também. Qualquer dúvida, agora ou depois — podem me chamar.</div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 20px;font-size:13px;font-weight:600">📋 Guia completo disponível online</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 20px;font-size:13px;font-weight:600">📅 1:1 de PDI — me chamem essa semana</div>
+      </div>
+    </div>
+    <div class="cover-accent-line"></div>
+  </div>
+
+</div><!-- /deck -->
+
+<!-- NAV CONTROLS -->
+<div class="nav-controls" id="nav-controls">
+  <button class="nav-btn" id="prev-btn" onclick="navigate(-1)" disabled>‹</button>
+  <div class="nav-dots" id="nav-dots"></div>
+  <button class="nav-btn" id="next-btn" onclick="navigate(1)">›</button>
+  <span class="nav-hint">← →</span>
+</div>
+
+<div class="key-hint">
+  <span class="key">←</span><span class="key">→</span> navegar &nbsp;
+  <span class="key">F</span> fullscreen &nbsp;
+  <span class="key">T</span> timer
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+  let timerInterval = null;
+  let timerSeconds = 0;
+  let timerRunning = false;
+
+  // ── BUILD DOTS ──
+  const dotsContainer = document.getElementById('nav-dots');
+  slides.forEach((s, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'nav-dot' + (s.classList.contains('slide-divider') || s.classList.contains('slide-cover') ? ' section' : '');
+    dot.onclick = () => goTo(i);
+    dotsContainer.appendChild(dot);
+  });
+
+  function updateSlide() {
+    slides.forEach((s, i) => {
+      s.classList.remove('active', 'prev');
+      if (i === current) s.classList.add('active');
+      else if (i < current) s.classList.add('prev');
+    });
+
+    // Update all counters and progress bars in slides
+    document.querySelectorAll('[id="slide-counter"]').forEach(el => {
+      el.textContent = (current + 1) + ' / ' + total;
+    });
+
+    const pct = Math.round(((current + 1) / total) * 100);
+    document.querySelectorAll('[id="progress"]').forEach(el => {
+      el.style.width = pct + '%';
+    });
+
+    // Main counter
+    document.getElementById('slide-counter').textContent = (current + 1) + ' / ' + total;
+    document.getElementById('progress').style.width = pct + '%';
+
+    // Dots
+    document.querySelectorAll('.nav-dot').forEach((d, i) => {
+      d.classList.toggle('active', i === current);
+    });
+
+    // Buttons
+    document.getElementById('prev-btn').disabled = current === 0;
+    document.getElementById('next-btn').disabled = current === total - 1;
+  }
+
+  function navigate(dir) {
+    const next = current + dir;
+    if (next >= 0 && next < total) {
+      current = next;
+      updateSlide();
+    }
+  }
+
+  function goTo(idx) {
+    current = idx;
+    updateSlide();
+  }
+
+  // ── TIMER ──
+  function pad(n) { return n.toString().padStart(2,'0'); }
+
+  function updateTimerDisplay() {
+    const m = Math.floor(timerSeconds / 60);
+    const s = timerSeconds % 60;
+    const str = pad(m) + ':' + pad(s);
+    document.querySelectorAll('[id="timer"]').forEach(el => {
+      el.textContent = str;
+      el.className = 'timer-pill';
+      if (timerSeconds >= 3300) el.classList.add('danger');
+      else if (timerSeconds >= 2700) el.classList.add('warn');
+    });
+  }
+
+  function toggleTimer() {
+    if (!timerRunning) {
+      timerInterval = setInterval(() => { timerSeconds++; updateTimerDisplay(); }, 1000);
+      timerRunning = true;
+    } else {
+      clearInterval(timerInterval);
+      timerRunning = false;
+    }
+  }
+
+  // ── KEYBOARD ──
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); navigate(1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); navigate(-1); }
+    else if (e.key === 'f' || e.key === 'F') { toggleFullscreen(); }
+    else if (e.key === 't' || e.key === 'T') { toggleTimer(); }
+    else if (e.key === 'Home') { goTo(0); }
+    else if (e.key === 'End') { goTo(total - 1); }
+  });
+
+  // ── FULLSCREEN ──
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  // ── TOUCH SWIPE ──
+  let touchStart = 0;
+  document.addEventListener('touchstart', e => { touchStart = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const diff = touchStart - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) navigate(diff > 0 ? 1 : -1);
+  });
+
+  // Init
+  updateSlide();
+  updateTimerDisplay();
+</script>
+</body>
+</html>
