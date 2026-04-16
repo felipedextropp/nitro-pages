@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tech Sync — Feedback · Payments PJ</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22253a;
+    --surface3: #2a2d40;
+    --border: #2e3250;
+    --accent: #6c63ff;
+    --accent2: #00d2a0;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --blue: #3b82f6;
+    --text: #e8eaf6;
+    --muted: #8a8fb5;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg); color: var(--text); min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 56px 24px 48px;
+    background: radial-gradient(ellipse at 70% 30%, rgba(108,99,255,0.15) 0%, transparent 55%),
+                radial-gradient(ellipse at 10% 90%, rgba(0,210,160,0.08) 0%, transparent 50%),
+                var(--bg);
+    border-bottom: 1px solid var(--border);
+    text-align: center; position: relative; overflow: hidden;
+  }
+  .hero::after {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), transparent);
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(108,99,255,0.12); border: 1px solid rgba(108,99,255,0.25);
+    border-radius: 20px; padding: 5px 16px; font-size: 11px; font-weight: 700;
+    color: #a99fff; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-size: clamp(28px, 5vw, 44px); font-weight: 900; letter-spacing: -1.5px;
+    color: #fff; line-height: 1.15; margin-bottom: 12px;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero-sub { font-size: 15px; color: var(--muted); max-width: 480px; margin: 0 auto; line-height: 1.6; }
+  .hero-meta { display: flex; gap: 12px; justify-content: center; margin-top: 24px; flex-wrap: wrap; }
+  .hero-meta span {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 6px 14px; font-size: 12px; font-weight: 600; color: var(--muted);
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  /* ── FORM CONTAINER ── */
+  .form-wrap {
+    max-width: 680px; margin: 40px auto; padding: 0 20px;
+    display: flex; flex-direction: column; gap: 20px;
+  }
+
+  /* ── STEP INDICATOR ── */
+  .steps {
+    display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 8px;
+  }
+  .step-item { display: flex; flex-direction: column; align-items: center; position: relative; flex: 1; }
+  .step-item:not(:last-child)::after {
+    content: ''; position: absolute; top: 14px; left: 50%; width: 100%;
+    height: 2px; background: var(--border); z-index: 0;
+  }
+  .step-item.done:not(:last-child)::after { background: var(--accent); }
+  .step-dot {
+    width: 28px; height: 28px; border-radius: 50%; background: var(--surface2);
+    border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; color: var(--muted); z-index: 1; position: relative;
+    transition: all .3s;
+  }
+  .step-item.active .step-dot { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .step-item.done .step-dot { background: var(--accent2); border-color: var(--accent2); color: #fff; font-size: 13px; }
+  .step-label { font-size: 10px; color: var(--muted); margin-top: 6px; font-weight: 600; white-space: nowrap; }
+  .step-item.active .step-label { color: var(--accent); }
+  .step-item.done .step-label { color: var(--accent2); }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; transition: border-color .2s;
+  }
+  .card-header {
+    padding: 20px 24px 16px; background: var(--surface2); border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; gap: 14px;
+  }
+  .card-icon {
+    width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center;
+    justify-content: center; font-size: 17px; flex-shrink: 0;
+  }
+  .card-title { font-size: 15px; font-weight: 800; color: #fff; line-height: 1.3; }
+  .card-desc { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+  .card-body { padding: 24px; }
+
+  /* ── FORM FIELDS ── */
+  label { font-size: 13px; font-weight: 700; color: #fff; display: block; margin-bottom: 10px; }
+  label .req { color: var(--accent); margin-left: 3px; }
+  label .opt { color: var(--muted); font-weight: 400; font-size: 11px; margin-left: 6px; }
+
+  input[type="text"], input[type="email"], textarea, select {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text); font-size: 14px; font-family: inherit;
+    padding: 12px 16px; outline: none; transition: border-color .2s, box-shadow .2s;
+    resize: vertical;
+  }
+  input[type="text"]:focus, input[type="email"]:focus, textarea:focus, select:focus {
+    border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,99,255,0.15);
+  }
+  input::placeholder, textarea::placeholder { color: #4a5080; }
+  textarea { min-height: 100px; }
+
+  /* ── RATING STARS ── */
+  .rating-wrap { display: flex; flex-direction: column; gap: 8px; }
+  .rating-stars { display: flex; gap: 8px; }
+  .star-btn {
+    width: 44px; height: 44px; border-radius: 10px; background: var(--surface2);
+    border: 1px solid var(--border); font-size: 20px; cursor: pointer;
+    transition: all .15s; display: flex; align-items: center; justify-content: center;
+    filter: grayscale(1); opacity: 0.4;
+  }
+  .star-btn:hover, .star-btn.active { filter: none; opacity: 1; border-color: var(--yellow); background: rgba(245,158,11,0.1); transform: scale(1.08); }
+  .rating-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); padding: 0 2px; }
+
+  /* ── EMOJI SCALE (NPS style) ── */
+  .emoji-scale { display: flex; gap: 8px; flex-wrap: wrap; }
+  .emoji-opt {
+    flex: 1; min-width: 52px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 6px; cursor: pointer; text-align: center;
+    transition: all .15s; user-select: none;
+  }
+  .emoji-opt:hover { border-color: rgba(108,99,255,0.4); background: rgba(108,99,255,0.07); }
+  .emoji-opt.selected { border-color: var(--accent); background: rgba(108,99,255,0.15); }
+  .emoji-opt .eo-emoji { font-size: 22px; display: block; margin-bottom: 4px; }
+  .emoji-opt .eo-label { font-size: 10px; color: var(--muted); font-weight: 600; line-height: 1.2; }
+  .emoji-opt.selected .eo-label { color: var(--accent); }
+
+  /* ── CHECKBOX TAGS ── */
+  .tag-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag-opt {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 16px; font-size: 13px; font-weight: 600; color: var(--muted);
+    cursor: pointer; transition: all .15s; user-select: none; display: flex; align-items: center; gap: 6px;
+  }
+  .tag-opt:hover { border-color: rgba(108,99,255,0.4); color: var(--text); }
+  .tag-opt.selected { background: rgba(108,99,255,0.15); border-color: var(--accent); color: var(--accent); }
+  .tag-opt .tag-icon { font-size: 14px; }
+  .tag-opt .tag-check { width: 16px; height: 16px; border: 1.5px solid var(--border); border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; transition: all .15s; }
+  .tag-opt.selected .tag-check { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* ── RADIO CARDS ── */
+  .radio-cards { display: flex; flex-direction: column; gap: 8px; }
+  .radio-card {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px; cursor: pointer; transition: all .15s; display: flex; align-items: flex-start; gap: 12px;
+  }
+  .radio-card:hover { border-color: rgba(108,99,255,0.4); }
+  .radio-card.selected { border-color: var(--accent); background: rgba(108,99,255,0.08); }
+  .radio-dot {
+    width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border);
+    flex-shrink: 0; margin-top: 1px; transition: all .15s; position: relative;
+  }
+  .radio-card.selected .radio-dot { border-color: var(--accent); background: var(--accent); }
+  .radio-card.selected .radio-dot::after {
+    content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 6px; height: 6px; background: #fff; border-radius: 50%;
+  }
+  .radio-title { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+  .radio-sub { font-size: 12px; color: var(--muted); line-height: 1.4; }
+
+  /* ── NPS ── */
+  .nps-wrap { display: flex; flex-direction: column; gap: 10px; }
+  .nps-scale { display: flex; gap: 6px; }
+  .nps-btn {
+    flex: 1; height: 44px; border-radius: 8px; background: var(--surface2);
+    border: 1px solid var(--border); color: var(--muted); font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: all .15s;
+  }
+  .nps-btn:hover { border-color: rgba(108,99,255,0.4); color: var(--text); }
+  .nps-btn.selected { border-color: var(--accent); background: rgba(108,99,255,0.2); color: #fff; }
+  .nps-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+
+  /* ── FIELD GROUP ── */
+  .field-group { display: flex; flex-direction: column; gap: 16px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* ── SUBMIT ── */
+  .submit-btn {
+    width: 100%; padding: 16px; border-radius: 12px; border: none; cursor: pointer;
+    font-size: 15px; font-weight: 800; letter-spacing: 0.3px;
+    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    color: #fff; transition: all .2s; position: relative; overflow: hidden;
+  }
+  .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(108,99,255,0.35); }
+  .submit-btn:active { transform: translateY(0); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* ── PREV / NEXT ── */
+  .nav-btns { display: flex; gap: 12px; }
+  .btn-secondary {
+    flex: 1; padding: 14px; border-radius: 12px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--muted); font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: all .15s;
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--text); }
+  .btn-primary {
+    flex: 2; padding: 14px; border-radius: 12px; border: none;
+    background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    color: #fff; font-size: 14px; font-weight: 800; cursor: pointer; transition: all .2s;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(108,99,255,0.3); }
+
+  /* ── SUCCESS ── */
+  .success-screen {
+    display: none; text-align: center; padding: 60px 24px;
+    background: radial-gradient(ellipse at 50% 50%, rgba(0,210,160,0.12) 0%, transparent 60%), var(--bg);
+    min-height: 60vh; align-items: center; justify-content: center; flex-direction: column;
+  }
+  .success-screen.show { display: flex; }
+  .success-icon { font-size: 72px; margin-bottom: 24px; animation: pop .5s ease; }
+  @keyframes pop { 0%{transform:scale(0.5);opacity:0} 70%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
+  .success-title { font-size: 32px; font-weight: 900; letter-spacing: -1px; color: #fff; margin-bottom: 12px; }
+  .success-sub { font-size: 16px; color: var(--muted); max-width: 400px; line-height: 1.6; margin-bottom: 32px; }
+  .success-chips { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .success-chip { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 16px; font-size: 12px; font-weight: 600; color: var(--muted); }
+
+  /* ── PROGRESS BAR ── */
+  .form-progress { height: 3px; background: var(--surface2); position: relative; }
+  .form-progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width .4s ease; border-radius: 0 2px 2px 0; }
+
+  /* ── COUNTER ── */
+  .char-count { font-size: 11px; color: var(--muted); text-align: right; margin-top: 6px; }
+
+  /* ── ANON NOTICE ── */
+  .anon-notice {
+    display: flex; gap: 10px; align-items: flex-start; background: rgba(0,210,160,0.07);
+    border: 1px solid rgba(0,210,160,0.2); border-radius: 10px; padding: 12px 16px;
+    font-size: 12px; color: #6ee7b7; line-height: 1.5;
+  }
+  .anon-icon { font-size: 16px; flex-shrink: 0; }
+
+  /* ── SECTION LABEL ── */
+  .section-sep { display: flex; align-items: center; gap: 12px; margin: 4px 0; }
+  .section-sep span { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); white-space: nowrap; }
+  .section-sep::before, .section-sep::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  @media (max-width: 600px) {
+    .field-row { grid-template-columns: 1fr; }
+    .emoji-scale { gap: 5px; }
+    .nps-scale { gap: 4px; }
+    .nps-btn { height: 38px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">📋 Payments PJ · Tech Sync</div>
+  <h1>Como foi a <span>Tech Sync</span>?<br/>Nos conta 👋</h1>
+  <p class="hero-sub">Leva menos de 3 minutos. Seu feedback define os próximos encontros.</p>
+  <div class="hero-meta">
+    <span>⏱️ ~3 minutos</span>
+    <span>🔒 Respostas anônimas</span>
+    <span>🎯 Payments PJ</span>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="form-progress">
+  <div class="form-progress-fill" id="form-progress" style="width:0%"></div>
+</div>
+
+<!-- FORM WRAP -->
+<div class="form-wrap" id="form-wrap">
+
+  <!-- STEPS -->
+  <div class="steps" id="steps">
+    <div class="step-item active" id="step-1">
+      <div class="step-dot">1</div>
+      <div class="step-label">Geral</div>
+    </div>
+    <div class="step-item" id="step-2">
+      <div class="step-dot">2</div>
+      <div class="step-label">Conteúdo</div>
+    </div>
+    <div class="step-item" id="step-3">
+      <div class="step-dot">3</div>
+      <div class="step-label">Próximos</div>
+    </div>
+    <div class="step-item" id="step-4">
+      <div class="step-dot">4</div>
+      <div class="step-label">Você</div>
+    </div>
+  </div>
+
+  <!-- ════ PÁGINA 1 — AVALIAÇÃO GERAL ════ -->
+  <div id="page-1">
+
+    <div class="anon-notice">
+      <span class="anon-icon">🔒</span>
+      <span>Suas respostas são <strong>completamente anônimas</strong>. Identificação é opcional e só usada se você quiser ser contatado para aprofundar o feedback.</span>
+    </div>
+
+    <!-- AVALIAÇÃO GERAL -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(108,99,255,0.15)">⭐</div>
+        <div>
+          <div class="card-title">Avaliação Geral</div>
+          <div class="card-desc">Como você avalia a Tech Sync de hoje no geral?</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="rating-wrap">
+          <div class="rating-stars" id="stars">
+            <button class="star-btn" data-val="1" onclick="setRating(1)">⭐</button>
+            <button class="star-btn" data-val="2" onclick="setRating(2)">⭐</button>
+            <button class="star-btn" data-val="3" onclick="setRating(3)">⭐</button>
+            <button class="star-btn" data-val="4" onclick="setRating(4)">⭐</button>
+            <button class="star-btn" data-val="5" onclick="setRating(5)">⭐</button>
+          </div>
+          <div class="rating-labels">
+            <span>Não valeu o tempo</span>
+            <span>Excelente</span>
+          </div>
+          <div id="rating-feedback" style="font-size:13px;color:var(--muted);min-height:18px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMO SE SENTIU -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(0,210,160,0.12)">😊</div>
+        <div>
+          <div class="card-title">Como você saiu do encontro?</div>
+          <div class="card-desc">Escolha o que mais representa como você se sentiu.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="emoji-scale" id="emoji-scale">
+          <div class="emoji-opt" data-val="animado" onclick="selectEmoji(this)">
+            <span class="eo-emoji">🚀</span>
+            <span class="eo-label">Animado</span>
+          </div>
+          <div class="emoji-opt" data-val="satisfeito" onclick="selectEmoji(this)">
+            <span class="eo-emoji">😊</span>
+            <span class="eo-label">Satisfeito</span>
+          </div>
+          <div class="emoji-opt" data-val="neutro" onclick="selectEmoji(this)">
+            <span class="eo-emoji">😐</span>
+            <span class="eo-label">Neutro</span>
+          </div>
+          <div class="emoji-opt" data-val="confuso" onclick="selectEmoji(this)">
+            <span class="eo-emoji">🤔</span>
+            <span class="eo-label">Com dúvidas</span>
+          </div>
+          <div class="emoji-opt" data-val="frustrado" onclick="selectEmoji(this)">
+            <span class="eo-emoji">😕</span>
+            <span class="eo-label">Frustrado</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NPS -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(59,130,246,0.12)">💬</div>
+        <div>
+          <div class="card-title">Você indicaria esse encontro para um colega de outro time?</div>
+          <div class="card-desc">0 = com certeza não · 10 = com certeza sim</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="nps-wrap">
+          <div class="nps-scale" id="nps-scale">
+            <button class="nps-btn" data-val="0" onclick="selectNps(this)">0</button>
+            <button class="nps-btn" data-val="1" onclick="selectNps(this)">1</button>
+            <button class="nps-btn" data-val="2" onclick="selectNps(this)">2</button>
+            <button class="nps-btn" data-val="3" onclick="selectNps(this)">3</button>
+            <button class="nps-btn" data-val="4" onclick="selectNps(this)">4</button>
+            <button class="nps-btn" data-val="5" onclick="selectNps(this)">5</button>
+            <button class="nps-btn" data-val="6" onclick="selectNps(this)">6</button>
+            <button class="nps-btn" data-val="7" onclick="selectNps(this)">7</button>
+            <button class="nps-btn" data-val="8" onclick="selectNps(this)">8</button>
+            <button class="nps-btn" data-val="9" onclick="selectNps(this)">9</button>
+            <button class="nps-btn" data-val="10" onclick="selectNps(this)">10</button>
+          </div>
+          <div class="nps-labels">
+            <span>👎 Não indicaria</span>
+            <span>👍 Indicaria muito</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-primary" onclick="goTo(2)">Próximo — Conteúdo →</button>
+    </div>
+  </div>
+
+  <!-- ════ PÁGINA 2 — AVALIAÇÃO DO CONTEÚDO ════ -->
+  <div id="page-2" style="display:none">
+
+    <!-- TEMAS ABORDADOS -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(245,158,11,0.12)">📋</div>
+        <div>
+          <div class="card-title">O que mais te agregou hoje?</div>
+          <div class="card-desc">Selecione todos os temas que valeram para você.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="tag-grid" id="temas-util">
+          <div class="tag-opt" onclick="toggleTag(this,'temas-util')" data-val="gestao-horas">
+            <div class="tag-check"></div><span class="tag-icon">⏰</span> Gestão de Horas
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'temas-util')" data-val="gestao-tarefas">
+            <div class="tag-check"></div><span class="tag-icon">📋</span> Gestão de Tarefas
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'temas-util')" data-val="suporte">
+            <div class="tag-check"></div><span class="tag-icon">🎧</span> Pedidos de Suporte
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'temas-util')" data-val="pdi">
+            <div class="tag-check"></div><span class="tag-icon">🌱</span> PDI
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'temas-util')" data-val="engenharia">
+            <div class="tag-check"></div><span class="tag-icon">⚙️</span> Boas Práticas Eng.
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'temas-util')" data-val="ai-first">
+            <div class="tag-check"></div><span class="tag-icon">🤖</span> AI First
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'temas-util')" data-val="dor-dod">
+            <div class="tag-check"></div><span class="tag-icon">✅</span> DoR & DoD
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFUNDIDADE -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(236,72,153,0.12)">🎯</div>
+        <div>
+          <div class="card-title">A profundidade dos temas foi adequada?</div>
+          <div class="card-desc">Muito superficial ou muito denso pode ser tão problemático quanto.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="radio-cards" id="profundidade">
+          <div class="radio-card" onclick="selectRadio('profundidade', this)" data-val="raso">
+            <div class="radio-dot"></div>
+            <div><div class="radio-title">Muito superficial</div><div class="radio-sub">Queria mais detalhes e aprofundamento nos temas</div></div>
+          </div>
+          <div class="radio-card" onclick="selectRadio('profundidade', this)" data-val="certo">
+            <div class="radio-dot"></div>
+            <div><div class="radio-title">Na medida certa</div><div class="radio-sub">Boa profundidade para o tempo disponível</div></div>
+          </div>
+          <div class="radio-card" onclick="selectRadio('profundidade', this)" data-val="denso">
+            <div class="radio-dot"></div>
+            <div><div class="radio-title">Muito denso</div><div class="radio-sub">Muita informação por vez — difícil absorver tudo</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DURACAO -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(0,210,160,0.12)">⏱️</div>
+        <div>
+          <div class="card-title">E a duração de 1 hora?</div>
+          <div class="card-desc">Considerando tudo que foi abordado.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="radio-cards" id="duracao">
+          <div class="radio-card" onclick="selectRadio('duracao', this)" data-val="curto">
+            <div class="radio-dot"></div>
+            <div><div class="radio-title">Curto demais</div><div class="radio-sub">Poderia ter aproveitado mais tempo</div></div>
+          </div>
+          <div class="radio-card" onclick="selectRadio('duracao', this)" data-val="ideal">
+            <div class="radio-dot"></div>
+            <div><div class="radio-title">Ideal</div><div class="radio-sub">1 hora foi perfeito para o que foi proposto</div></div>
+          </div>
+          <div class="radio-card" onclick="selectRadio('duracao', this)" data-val="longo">
+            <div class="radio-dot"></div>
+            <div><div class="radio-title">Longo demais</div><div class="radio-sub">Poderia ter sido mais direto e objetivo</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- O QUE FALTOU -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(108,99,255,0.15)">💭</div>
+        <div>
+          <div class="card-title">O que poderia ter sido melhor?</div>
+          <div class="card-desc">Formato, condução, conteúdo, horário — qualquer coisa.<span class="opt">&nbsp;Opcional</span></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <textarea id="melhorias" placeholder="Ex: poderia ter mais espaço para perguntas, o tema X poderia ser mais prático, prefiro encontros menores..." oninput="countChars(this,'count-melhorias',300)"></textarea>
+        <div class="char-count" id="count-melhorias">0 / 300</div>
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-secondary" onclick="goTo(1)">← Voltar</button>
+      <button class="btn-primary" onclick="goTo(3)">Próximo — Próximos encontros →</button>
+    </div>
+  </div>
+
+  <!-- ════ PÁGINA 3 — PRÓXIMOS TEMAS ════ -->
+  <div id="page-3" style="display:none">
+
+    <!-- TEMAS DESEJADOS -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(0,210,160,0.12)">🚀</div>
+        <div>
+          <div class="card-title">O que você quer ver nos próximos encontros?</div>
+          <div class="card-desc">Selecione quantos quiser — isso vai definir a agenda das próximas Tech Syncs.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="section-sep"><span>🏗️ Arquitetura & Técnico</span></div>
+        <div class="tag-grid" id="next-temas" style="margin-bottom:16px">
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="arch-microservicos">
+            <div class="tag-check"></div><span class="tag-icon">🏗️</span> Arquitetura de Microsserviços
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="kafka-events">
+            <div class="tag-check"></div><span class="tag-icon">📨</span> Kafka & Event-Driven
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="observabilidade">
+            <div class="tag-check"></div><span class="tag-icon">📊</span> Observabilidade & Alertas
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="testes">
+            <div class="tag-check"></div><span class="tag-icon">🧪</span> Estratégias de Testes
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="seguranca">
+            <div class="tag-check"></div><span class="tag-icon">🔒</span> Segurança & OWASP
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="performance">
+            <div class="tag-check"></div><span class="tag-icon">⚡</span> Performance & Latência
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="debito-tecnico">
+            <div class="tag-check"></div><span class="tag-icon">📉</span> Gestão de Débito Técnico
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="ci-cd">
+            <div class="tag-check"></div><span class="tag-icon">🚀</span> CI/CD & Deploy
+          </div>
+        </div>
+
+        <div class="section-sep"><span>💳 Domínio Pix & Payments</span></div>
+        <div class="tag-grid" id="next-temas-domain" style="margin-bottom:16px">
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="pix-jdpi">
+            <div class="tag-check"></div><span class="tag-icon">⚡</span> Protocolo Pix / JDPI
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="conciliacao">
+            <div class="tag-check"></div><span class="tag-icon">🔄</span> Conciliação & Liquidação
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="fraude">
+            <div class="tag-check"></div><span class="tag-icon">🛡️</span> Prevenção a Fraude
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="regulatorio">
+            <div class="tag-check"></div><span class="tag-icon">📋</span> Regulatório BACEN
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="iso20022">
+            <div class="tag-check"></div><span class="tag-icon">🌐</span> ISO 20022 na prática
+          </div>
+        </div>
+
+        <div class="section-sep"><span>🤖 IA & Carreira</span></div>
+        <div class="tag-grid" id="next-temas-ai" style="margin-bottom:16px">
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="ai-pratico">
+            <div class="tag-check"></div><span class="tag-icon">🤖</span> IA na prática do dev
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="prompt-eng">
+            <div class="tag-check"></div><span class="tag-icon">✍️</span> Prompt Engineering
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="carreira-sr">
+            <div class="tag-check"></div><span class="tag-icon">🌱</span> Carreira: de Pl para Sr
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="carreira-staff">
+            <div class="tag-check"></div><span class="tag-icon">⭐</span> Carreira: de Sr para Staff
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="lideranca-tecnica">
+            <div class="tag-check"></div><span class="tag-icon">🎤</span> Liderança Técnica sem cargo
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="comunicacao-tech">
+            <div class="tag-check"></div><span class="tag-icon">💬</span> Comunicação técnica eficaz
+          </div>
+        </div>
+
+        <div class="section-sep"><span>⚙️ Processo & Qualidade</span></div>
+        <div class="tag-grid" id="next-temas-proc">
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="dor-dod-deep">
+            <div class="tag-check"></div><span class="tag-icon">✅</span> DoR & DoD — hands-on
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="code-review">
+            <div class="tag-check"></div><span class="tag-icon">🔍</span> Code Review eficaz
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="incident-management">
+            <div class="tag-check"></div><span class="tag-icon">🚨</span> Gestão de Incidentes
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="postmortem">
+            <div class="tag-check"></div><span class="tag-icon">📝</span> Como fazer Postmortem
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="flow-metrics">
+            <div class="tag-check"></div><span class="tag-icon">📈</span> Métricas de Fluxo (CT, WIP)
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'next-temas')" data-val="refinamento">
+            <div class="tag-check"></div><span class="tag-icon">🎯</span> Como refinar bem
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEMA LIVRE -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(236,72,153,0.12)">💡</div>
+        <div>
+          <div class="card-title">Tem algum tema que não está na lista?</div>
+          <div class="card-desc">Escreve aqui — isso pode virar a pauta do próximo encontro.<span class="opt">&nbsp;Opcional</span></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <textarea id="tema-livre" placeholder="Ex: quero entender mais sobre outbox pattern, gostaria de uma sessão de pair programming sobre X, falar sobre boas práticas de SQL em alta escala..." oninput="countChars(this,'count-tema',400)"></textarea>
+        <div class="char-count" id="count-tema">0 / 400</div>
+      </div>
+    </div>
+
+    <!-- FORMATO -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(108,99,255,0.15)">🎨</div>
+        <div>
+          <div class="card-title">Qual formato você prefere para os próximos encontros?</div>
+          <div class="card-desc">Pode selecionar mais de um.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="tag-grid" id="formatos">
+          <div class="tag-opt" onclick="toggleTag(this,'formatos')" data-val="apresentacao">
+            <div class="tag-check"></div><span class="tag-icon">🎤</span> Apresentação + debate
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'formatos')" data-val="hands-on">
+            <div class="tag-check"></div><span class="tag-icon">💻</span> Hands-on / live coding
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'formatos')" data-val="estudo-caso">
+            <div class="tag-check"></div><span class="tag-icon">🔬</span> Estudo de caso real
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'formatos')" data-val="debate">
+            <div class="tag-check"></div><span class="tag-icon">💬</span> Debate aberto s/ slides
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'formatos')" data-val="guest">
+            <div class="tag-check"></div><span class="tag-icon">🧑‍💼</span> Convidado externo
+          </div>
+          <div class="tag-opt" onclick="toggleTag(this,'formatos')" data-val="relato">
+            <div class="tag-check"></div><span class="tag-icon">📖</span> Relato de experiência do time
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FREQUÊNCIA -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(245,158,11,0.12)">📅</div>
+        <div>
+          <div class="card-title">Com que frequência você quer que a Tech Sync aconteça?</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="radio-cards" id="frequencia">
+          <div class="radio-card" onclick="selectRadio('frequencia', this)" data-val="semanal">
+            <div class="radio-dot"></div>
+            <div><div class="radio-title">Semanal</div><div class="radio-sub">Toda semana, encontros mais curtos (~30min)</div></div>
+          </div>
+          <div class="radio-card" onclick="selectRadio('frequencia', this)" data-val="quinzenal">
+            <div class="radio-dot"></div>
+            <div><div class="radio-title">Quinzenal</div><div class="radio-sub">A cada 2 semanas, 1 hora por encontro</div></div>
+          </div>
+          <div class="radio-card" onclick="selectRadio('frequencia', this)" data-val="mensal">
+            <div class="radio-dot"></div>
+            <div><div class="radio-title">Mensal</div><div class="radio-sub">Uma vez por mês, mais tempo e mais profundidade</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-secondary" onclick="goTo(2)">← Voltar</button>
+      <button class="btn-primary" onclick="goTo(4)">Próximo — Finalizar →</button>
+    </div>
+  </div>
+
+  <!-- ════ PÁGINA 4 — DADOS + ENVIO ════ -->
+  <div id="page-4" style="display:none">
+
+    <!-- CONTEXTO PESSOAL -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(0,210,160,0.12)">👤</div>
+        <div>
+          <div class="card-title">Sobre você <span style="font-weight:400;color:var(--muted)">(tudo opcional)</span></div>
+          <div class="card-desc">Só para entender melhor o contexto das respostas. Não identifica você.</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="field-group">
+
+          <div>
+            <label>Qual seu time? <span class="opt">Opcional</span></label>
+            <div class="tag-grid" id="time-tag">
+              <div class="tag-opt" onclick="selectSingle(this,'time-tag')" data-val="pjpy">
+                <div class="tag-check"></div> Payments PJ
+              </div>
+              <div class="tag-opt" onclick="selectSingle(this,'time-tag')" data-val="bpjpif">
+                <div class="tag-check"></div> PIX na IF
+              </div>
+              <div class="tag-opt" onclick="selectSingle(this,'time-tag')" data-val="tfpxpj">
+                <div class="tag-check"></div> Plataforma Pix PJ
+              </div>
+              <div class="tag-opt" onclick="selectSingle(this,'time-tag')" data-val="xpppj">
+                <div class="tag-check"></div> XP Payments PJ
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label>Senioridade <span class="opt">Opcional</span></label>
+            <div class="tag-grid" id="senior-tag">
+              <div class="tag-opt" onclick="selectSingle(this,'senior-tag')" data-val="jr">
+                <div class="tag-check"></div> Júnior
+              </div>
+              <div class="tag-opt" onclick="selectSingle(this,'senior-tag')" data-val="pl">
+                <div class="tag-check"></div> Pleno
+              </div>
+              <div class="tag-opt" onclick="selectSingle(this,'senior-tag')" data-val="sr">
+                <div class="tag-check"></div> Sênior
+              </div>
+              <div class="tag-opt" onclick="selectSingle(this,'senior-tag')" data-val="staff">
+                <div class="tag-check"></div> Especialista / Staff
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label>Stack principal <span class="opt">Opcional</span></label>
+            <div class="tag-grid" id="stack-tag">
+              <div class="tag-opt" onclick="selectSingle(this,'stack-tag')" data-val="backend">
+                <div class="tag-check"></div> 🖥️ Backend
+              </div>
+              <div class="tag-opt" onclick="selectSingle(this,'stack-tag')" data-val="ios">
+                <div class="tag-check"></div> 📱 iOS
+              </div>
+              <div class="tag-opt" onclick="selectSingle(this,'stack-tag')" data-val="android">
+                <div class="tag-check"></div> 🤖 Android
+              </div>
+              <div class="tag-opt" onclick="selectSingle(this,'stack-tag')" data-val="fullstack">
+                <div class="tag-check"></div> ⚡ Full-stack
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label>Comentário final <span class="opt">Opcional</span></label>
+            <textarea id="comentario-final" placeholder="Alguma coisa que ficou na cabeça e você quer deixar registrado? Elogio, crítica, ideia — é tudo bem-vindo..." oninput="countChars(this,'count-final',500)"></textarea>
+            <div class="char-count" id="count-final">0 / 500</div>
+          </div>
+
+          <div>
+            <label>Quer ser contatado sobre alguma resposta? <span class="opt">Opcional — só se quiser</span></label>
+            <input type="text" id="contato" placeholder="@seu-slack ou nome — só se quiser ser identificado"/>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="anon-notice">
+      <span class="anon-icon">✅</span>
+      <span>Ao enviar, você confirma que está ciente que as respostas serão usadas exclusivamente para melhorar os próximos encontros da Tech Sync do time Payments PJ.</span>
+    </div>
+
+    <div class="nav-btns">
+      <button class="btn-secondary" onclick="goTo(3)">← Voltar</button>
+      <button class="btn-primary" id="submit-btn" onclick="submitForm()">🚀 Enviar Feedback</button>
+    </div>
+  </div>
+
+</div><!-- /form-wrap -->
+
+<!-- SUCCESS -->
+<div class="success-screen" id="success-screen">
+  <div class="success-icon">🎉</div>
+  <div class="success-title">Obrigado pelo feedback!</div>
+  <p class="success-sub">Suas respostas vão direto para a definição dos próximos encontros. O time agradece.</p>
+  <div class="success-chips">
+    <div class="success-chip">📊 Resposta registrada</div>
+    <div class="success-chip">🔒 Anonimato preservado</div>
+    <div class="success-chip">🚀 Próxima Tech Sync em breve</div>
+  </div>
+</div>
+
+<script>
+  let currentPage = 1;
+  const totalPages = 4;
+
+  // ── DATA STORE ──
+  const data = {
+    rating: null,
+    emoji: null,
+    nps: null,
+    temasUtil: [],
+    profundidade: null,
+    duracao: null,
+    melhorias: '',
+    nextTemas: [],
+    temaLivre: '',
+    formatos: [],
+    frequencia: null,
+    time: null,
+    senioridade: null,
+    stack: null,
+    comentarioFinal: '',
+    contato: '',
+  };
+
+  // ── NAVIGATION ──
+  function goTo(page) {
+    document.getElementById(`page-${currentPage}`).style.display = 'none';
+    currentPage = page;
+    document.getElementById(`page-${currentPage}`).style.display = 'block';
+    updateSteps();
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function updateSteps() {
+    for (let i = 1; i <= totalPages; i++) {
+      const el = document.getElementById(`step-${i}`);
+      if (!el) continue;
+      el.classList.remove('active', 'done');
+      if (i < currentPage) el.classList.add('done'), el.querySelector('.step-dot').textContent = '✓';
+      else if (i === currentPage) el.classList.add('active');
+      else el.querySelector('.step-dot').textContent = i;
+    }
+  }
+
+  function updateProgress() {
+    const pct = Math.round(((currentPage - 1) / totalPages) * 100);
+    document.getElementById('form-progress').style.width = pct + '%';
+  }
+
+  // ── RATING ──
+  const ratingLabels = ['','😤 Não valeu o tempo','😕 Abaixo do esperado','😐 Foi ok','😊 Bom encontro','🚀 Excelente!'];
+  function setRating(val) {
+    data.rating = val;
+    document.querySelectorAll('.star-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', i < val);
+    });
+    document.getElementById('rating-feedback').textContent = ratingLabels[val];
+  }
+
+  // ── EMOJI SCALE ──
+  function selectEmoji(el) {
+    document.querySelectorAll('#emoji-scale .emoji-opt').forEach(e => e.classList.remove('selected'));
+    el.classList.add('selected');
+    data.emoji = el.dataset.val;
+  }
+
+  // ── NPS ──
+  function selectNps(btn) {
+    document.querySelectorAll('#nps-scale .nps-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    data.nps = parseInt(btn.dataset.val);
+  }
+
+  // ── TOGGLE TAG (multi) ──
+  function toggleTag(el, groupId) {
+    el.classList.toggle('selected');
+    el.querySelector('.tag-check').textContent = el.classList.contains('selected') ? '✓' : '';
+  }
+
+  // ── SELECT SINGLE TAG ──
+  function selectSingle(el, groupId) {
+    document.querySelectorAll(`#${groupId} .tag-opt`).forEach(t => {
+      t.classList.remove('selected');
+      t.querySelector('.tag-check').textContent = '';
+    });
+    el.classList.add('selected');
+    el.querySelector('.tag-check').textContent = '✓';
+    data[groupId.replace('-tag','')] = el.dataset.val;
+  }
+
+  // ── RADIO CARDS ──
+  function selectRadio(groupId, el) {
+    document.querySelectorAll(`#${groupId} .radio-card`).forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    data[groupId] = el.dataset.val;
+  }
+
+  // ── CHAR COUNTER ──
+  function countChars(el, counterId, max) {
+    const len = el.value.length;
+    document.getElementById(counterId).textContent = len + ' / ' + max;
+    if (len > max) el.value = el.value.slice(0, max);
+  }
+
+  // ── SUBMIT ──
+  function submitForm() {
+    // Collect free-text
+    data.melhorias = document.getElementById('melhorias').value;
+    data.temaLivre = document.getElementById('tema-livre').value;
+    data.comentarioFinal = document.getElementById('comentario-final').value;
+    data.contato = document.getElementById('contato').value;
+
+    // Collect multi-tags
+    data.temasUtil = [...document.querySelectorAll('#temas-util .tag-opt.selected')].map(e => e.dataset.val);
+    data.nextTemas = [...document.querySelectorAll('#next-temas .tag-opt.selected, #next-temas-domain .tag-opt.selected, #next-temas-ai .tag-opt.selected, #next-temas-proc .tag-opt.selected')].map(e => e.dataset.val);
+    data.formatos = [...document.querySelectorAll('#formatos .tag-opt.selected')].map(e => e.dataset.val);
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Enviando...';
+
+    // Simulate async submission
+    setTimeout(() => {
+      document.getElementById('form-wrap').style.display = 'none';
+      document.getElementById('success-screen').classList.add('show');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Log data to console for dev visibility
+      console.log('📋 Tech Sync Feedback:', data);
+    }, 1200);
+  }
+
+  // Init
+  updateProgress();
+</script>
+</body>
+</html>
