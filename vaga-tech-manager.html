@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tech Manager — Payments PJ · PicPay</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22253a;
+    --surface3: #2a2d40;
+    --border: #2e3250;
+    --accent: #6c63ff;
+    --accent2: #00d2a0;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --blue: #3b82f6;
+    --pink: #ec4899;
+    --text: #e8eaf6;
+    --muted: #8a8fb5;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
+    padding: 80px 10vw; position: relative; overflow: hidden;
+    background: radial-gradient(ellipse at 80% 40%, rgba(108,99,255,0.15) 0%, transparent 55%),
+                radial-gradient(ellipse at 10% 80%, rgba(0,210,160,0.1) 0%, transparent 50%),
+                var(--bg);
+  }
+  .hero::after {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), transparent);
+  }
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 10px; margin-bottom: 28px;
+  }
+  .hero-tag-item {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(108,99,255,0.12); border: 1px solid rgba(108,99,255,0.25);
+    border-radius: 20px; padding: 5px 16px; font-size: 11px; font-weight: 700;
+    color: #a99fff; letter-spacing: 0.6px; text-transform: uppercase;
+  }
+  .hero-tag-sep { color: var(--border); }
+  .hero-role {
+    font-size: clamp(14px, 1.5vw, 17px); font-weight: 700; color: var(--accent2);
+    text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px;
+  }
+  .hero-title {
+    font-size: clamp(44px, 6vw, 80px); font-weight: 900; line-height: 1.05;
+    letter-spacing: -3px; color: #fff; margin-bottom: 24px;
+  }
+  .hero-title span { color: var(--accent); }
+  .hero-subtitle {
+    font-size: clamp(16px, 1.8vw, 20px); color: var(--muted); max-width: 640px;
+    line-height: 1.65; margin-bottom: 40px;
+  }
+  .hero-meta { display: flex; gap: 16px; flex-wrap: wrap; }
+  .meta-chip {
+    display: flex; align-items: center; gap: 10px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 10px; padding: 12px 20px;
+  }
+  .mc-icon { font-size: 18px; }
+  .mc-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .mc-val { font-size: 13px; font-weight: 700; color: #fff; }
+  .hero-scroll {
+    position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+    font-size: 11px; color: var(--muted); display: flex; flex-direction: column;
+    align-items: center; gap: 6px; letter-spacing: 0.5px;
+  }
+  .scroll-arrow { animation: bounce 1.5s infinite; font-size: 16px; }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(6px)} }
+
+  /* ── SECTION ── */
+  section { padding: 80px 10vw; position: relative; }
+  section:nth-child(even) { background: rgba(26,29,39,0.5); }
+  .section-eyebrow {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--accent); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+  }
+  .section-eyebrow::before { content: ''; width: 24px; height: 2px; background: var(--accent); border-radius: 2px; }
+  .section-title { font-size: clamp(28px, 3.5vw, 44px); font-weight: 900; letter-spacing: -1.5px; color: #fff; margin-bottom: 8px; }
+  .section-sub { font-size: 16px; color: var(--muted); max-width: 640px; margin-bottom: 48px; line-height: 1.6; }
+
+  /* ── MISSION BLOCK ── */
+  .mission-block {
+    background: linear-gradient(135deg, rgba(108,99,255,0.1), rgba(0,210,160,0.06));
+    border: 1px solid rgba(108,99,255,0.25); border-radius: var(--radius);
+    padding: 40px 48px; position: relative; overflow: hidden;
+  }
+  .mission-block::before {
+    content: '"'; position: absolute; top: -20px; left: 32px;
+    font-size: 200px; color: rgba(108,99,255,0.06); font-weight: 900; line-height: 1;
+    font-family: Georgia, serif; pointer-events: none;
+  }
+  .mission-text {
+    font-size: clamp(18px, 2vw, 24px); font-weight: 600; color: var(--text);
+    line-height: 1.65; position: relative; z-index: 1;
+  }
+  .mission-text strong { color: #fff; }
+  .mission-text em { color: var(--accent2); font-style: normal; font-weight: 700; }
+
+  /* ── CONTEXT CARDS ── */
+  .context-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+  .ctx-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 28px; position: relative; overflow: hidden; transition: transform .2s, border-color .2s;
+  }
+  .ctx-card:hover { transform: translateY(-3px); border-color: rgba(108,99,255,0.35); }
+  .ctx-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: var(--radius) var(--radius) 0 0;
+  }
+  .ctx-card.purple::before { background: var(--accent); }
+  .ctx-card.green::before { background: var(--accent2); }
+  .ctx-card.red::before { background: var(--red); }
+  .ctx-card.yellow::before { background: var(--yellow); }
+  .ctx-card.blue::before { background: var(--blue); }
+  .ctx-card.pink::before { background: var(--pink); }
+  .ctx-num { font-size: 40px; font-weight: 900; line-height: 1; margin-bottom: 8px; }
+  .ctx-label { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .ctx-sub { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ── RESPONSIBILITY TABS ── */
+  .resp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .resp-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; }
+  .resp-title { font-size: 14px; font-weight: 800; color: #fff; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+  .resp-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(46,50,80,0.4); font-size: 13px; line-height: 1.5; }
+  .resp-item:last-child { border-bottom: none; }
+  .resp-bullet { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .resp-item strong { color: #fff; display: block; margin-bottom: 2px; }
+  .resp-item span { color: var(--muted); }
+
+  /* ── CHALLENGE ITEMS ── */
+  .challenge-list { display: flex; flex-direction: column; gap: 16px; }
+  .challenge-item {
+    display: flex; gap: 20px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px; align-items: flex-start;
+    transition: border-color .2s;
+  }
+  .challenge-item:hover { border-color: rgba(108,99,255,0.3); }
+  .challenge-num {
+    width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center;
+    justify-content: center; font-size: 14px; font-weight: 900; flex-shrink: 0;
+    background: rgba(108,99,255,0.15); color: var(--accent); border: 1px solid rgba(108,99,255,0.2);
+  }
+  .challenge-title { font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+  .challenge-body { font-size: 13px; color: var(--muted); line-height: 1.65; }
+  .challenge-body strong { color: var(--text); }
+
+  /* ── PROFILE ── */
+  .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .profile-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; }
+  .profile-section-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--accent2); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .skill-item { display: flex; align-items: flex-start; gap: 12px; padding: 8px 0; border-bottom: 1px solid rgba(46,50,80,0.35); font-size: 13px; }
+  .skill-item:last-child { border-bottom: none; }
+  .skill-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .skill-item strong { color: #fff; }
+  .skill-item span { color: var(--muted); font-size: 12px; }
+
+  /* ── ANTI-PROFILE ── */
+  .anti-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 32px; }
+  .anti-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; }
+  .anti-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .anti-item { display: flex; gap: 10px; margin-bottom: 10px; font-size: 13px; color: #c8d0e8; line-height: 1.5; }
+  .anti-item:last-child { margin-bottom: 0; }
+
+  /* ── SUCCESS METRICS ── */
+  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+  .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; text-align: center; }
+  .metric-horizon { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; padding: 3px 12px; border-radius: 20px; display: inline-block; }
+  .metric-icon { font-size: 28px; margin-bottom: 8px; }
+  .metric-label { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 6px; line-height: 1.3; }
+  .metric-detail { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+  /* ── CTA ── */
+  .cta-section {
+    min-height: 60vh; display: flex; flex-direction: column; justify-content: center;
+    align-items: center; text-align: center; padding: 80px 10vw;
+    background: radial-gradient(ellipse at 50% 50%, rgba(108,99,255,0.15) 0%, transparent 60%), var(--bg);
+    position: relative; overflow: hidden;
+  }
+  .cta-title { font-size: clamp(32px, 5vw, 60px); font-weight: 900; letter-spacing: -2px; color: #fff; margin-bottom: 16px; }
+  .cta-sub { font-size: 18px; color: var(--muted); max-width: 560px; margin-bottom: 40px; line-height: 1.6; }
+  .cta-facts { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-bottom: 40px; }
+  .cta-fact { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 20px; font-size: 13px; font-weight: 600; }
+
+  /* ── DIVIDER ── */
+  .sep { height: 1px; background: var(--border); margin: 0; }
+
+  /* ── PILL ── */
+  .pill { display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .pill-purple { background: rgba(108,99,255,0.15); color: #a99fff; border: 1px solid rgba(108,99,255,0.3); }
+  .pill-green { background: rgba(0,210,160,0.12); color: #34d399; border: 1px solid rgba(0,210,160,0.25); }
+  .pill-red { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+  .pill-yellow { background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.25); }
+  .pill-blue { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.25); }
+
+  /* ── QUOTE ── */
+  .pull-quote { border-left: 4px solid var(--accent); background: rgba(108,99,255,0.07); padding: 24px 32px; border-radius: 0 var(--radius) var(--radius) 0; margin: 32px 0; font-size: 17px; font-style: italic; color: #c5c0f0; line-height: 1.65; }
+  .pull-quote strong { color: #fff; font-style: normal; }
+
+  /* ── STICKY NAV ── */
+  .sticky-nav {
+    position: sticky; top: 0; z-index: 100; background: rgba(15,17,23,0.92);
+    border-bottom: 1px solid var(--border); backdrop-filter: blur(12px);
+    padding: 0 10vw; display: flex; align-items: center; justify-content: space-between; height: 52px;
+  }
+  .sticky-logo { font-size: 13px; font-weight: 800; color: var(--accent); }
+  .sticky-links { display: flex; gap: 24px; }
+  .sticky-link { font-size: 12px; color: var(--muted); text-decoration: none; font-weight: 600; transition: color .15s; }
+  .sticky-link:hover { color: var(--text); }
+  .sticky-badge { background: rgba(0,210,160,0.12); border: 1px solid rgba(0,210,160,0.25); border-radius: 6px; padding: 3px 12px; font-size: 11px; font-weight: 700; color: var(--accent2); }
+
+  /* ── FOOTER ── */
+  footer { padding: 32px 10vw; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+  .footer-logo { font-size: 13px; font-weight: 800; color: var(--accent); }
+  .footer-right { font-size: 12px; color: var(--muted); }
+
+  @media (max-width: 768px) {
+    .hero, section { padding: 60px 24px; }
+    .resp-grid, .profile-grid, .anti-grid { grid-template-columns: 1fr; }
+    .sticky-links { display: none; }
+    .hero-meta { flex-direction: column; }
+    footer { padding: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- STICKY NAV -->
+<nav class="sticky-nav">
+  <div class="sticky-logo">◈ PicPay</div>
+  <div class="sticky-links">
+    <a class="sticky-link" href="#missao">Missão</a>
+    <a class="sticky-link" href="#contexto">Contexto</a>
+    <a class="sticky-link" href="#responsabilidades">Responsabilidades</a>
+    <a class="sticky-link" href="#desafios">Desafios</a>
+    <a class="sticky-link" href="#perfil">Perfil</a>
+    <a class="sticky-link" href="#sucesso">Sucesso</a>
+  </div>
+  <div class="sticky-badge">🟢 Vaga Aberta</div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">
+    <div class="hero-tag-item">📍 São Paulo · Remoto</div>
+    <div class="hero-tag-item">🏢 Serviços Financeiros PJ</div>
+    <div class="hero-tag-item">💳 Tribo Payments PJ</div>
+  </div>
+  <div class="hero-role">Vaga de Liderança Técnica</div>
+  <h1 class="hero-title">Tech Manager<br/><span>Payments PJ</span></h1>
+  <p class="hero-subtitle">
+    Liderar a engenharia que processa pagamentos Pix, cartão e transferências para dezenas de milhares de empresas PJ no Brasil. Uma das posições mais estratégicas da divisão de Serviços Financeiros PJ do PicPay.
+  </p>
+  <div class="hero-meta">
+    <div class="meta-chip">
+      <span class="mc-icon">👥</span>
+      <div><div class="mc-lbl">Tamanho do time</div><div class="mc-val">13+ engenheiros</div></div>
+    </div>
+    <div class="meta-chip">
+      <span class="mc-icon">🏗️</span>
+      <div><div class="mc-lbl">Squads</div><div class="mc-val">Payments PJ · PIX na IF · Plataforma Pix PJ · XP Payments PJ</div></div>
+    </div>
+    <div class="meta-chip">
+      <span class="mc-icon">📊</span>
+      <div><div class="mc-lbl">Senioridades</div><div class="mc-val">Jr · Pl · Sr · Especialista</div></div>
+    </div>
+    <div class="meta-chip">
+      <span class="mc-icon">⚙️</span>
+      <div><div class="mc-lbl">Stack</div><div class="mc-val">PHP · Kotlin · Swift · Android · Kafka · AWS</div></div>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <span>role para baixo</span>
+    <span class="scroll-arrow">↓</span>
+  </div>
+</div>
+
+<!-- MISSÃO -->
+<section id="missao">
+  <div class="section-eyebrow">Missão da Posição</div>
+  <h2 class="section-title">O que você vai fazer</h2>
+  <p class="section-sub">A razão de existir dessa posição em uma frase.</p>
+
+  <div class="mission-block">
+    <div class="mission-text">
+      Construir e liderar o time de engenharia responsável pelos produtos de pagamento da plataforma PJ do PicPay — garantindo que <strong>Pix, cartão e transferências para empresas</strong> funcionem com <em>altíssima confiabilidade, velocidade de entrega e excelência técnica</em>, ao mesmo tempo em que desenvolve cada engenheiro do time para que alcancem o melhor da sua carreira.
+    </div>
+  </div>
+
+  <div class="pull-quote" style="margin-top:48px">
+    "Nessa posição, você não apenas gerencia um time de tecnologia — você <strong>define a cultura de engenharia</strong> que vai sustentar os produtos financeiros de dezenas de milhares de empresas brasileiras, num contexto de alta regulação, alto volume transacional e alta expectativa de qualidade."
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- CONTEXTO -->
+<section id="contexto">
+  <div class="section-eyebrow">Contexto do Negócio</div>
+  <h2 class="section-title">O ambiente em que você vai operar</h2>
+  <p class="section-sub">Dados reais da estrutura que você vai liderar — sem romantismo.</p>
+
+  <div class="context-grid">
+    <div class="ctx-card purple">
+      <div class="ctx-num" style="color:var(--accent)">4</div>
+      <div class="ctx-label">Squads sob sua gestão</div>
+      <div class="ctx-sub">Payments PJ · Banking PJ PIX na IF · Plataforma Pix PJ · XP Payments PJ — cada uma com contexto e desafios técnicos distintos.</div>
+    </div>
+    <div class="ctx-card green">
+      <div class="ctx-num" style="color:var(--accent2)">13+</div>
+      <div class="ctx-label">Engenheiros no time</div>
+      <div class="ctx-sub">Jr, Pl, Sr e Especialistas. Diversidade de senioridade que exige estratégia de desenvolvimento individual para cada pessoa.</div>
+    </div>
+    <div class="ctx-card red">
+      <div class="ctx-num" style="color:var(--red)">28</div>
+      <div class="ctx-label">P3s em março/2026</div>
+      <div class="ctx-sub">Incidentes distribuídos entre os 4 times. Estabilidade operacional é um desafio real e prioritário que a nova liderança precisa endereçar.</div>
+    </div>
+    <div class="ctx-card yellow">
+      <div class="ctx-num" style="color:var(--yellow)">54%</div>
+      <div class="ctx-label">Adoção de IA nas entregas</div>
+      <div class="ctx-sub">Dos batches entregues na tribo já são assistidos por IA. O time está na fronteira da engenharia moderna — e a liderança precisa acelerar isso.</div>
+    </div>
+    <div class="ctx-card blue">
+      <div class="ctx-num" style="color:var(--blue)">JDPI</div>
+      <div class="ctx-label">Protocolo regulatório central</div>
+      <div class="ctx-sub">A plataforma opera sob regras estritas do BACEN. Compliance técnico com SPI/JDPI é não-negociável e envolve domínio aprofundado do ecossistema Pix.</div>
+    </div>
+    <div class="ctx-card pink">
+      <div class="ctx-num" style="color:var(--pink)">ISO<br/>20022</div>
+      <div class="ctx-label">Padrão de mensageria financeira</div>
+      <div class="ctx-sub">Tratamento de erros, devoluções e conciliações seguem padrões internacionais. A complexidade técnica do domínio é real e exige liderança que entenda ou aprenda rapidamente.</div>
+    </div>
+  </div>
+
+  <div class="pull-quote">
+    O time já construiu uma plataforma Pix do zero em 4 meses. Agora precisa de uma liderança que <strong>sustente a operação com excelência, acelere o desenvolvimento das pessoas e eleve o padrão de qualidade técnica</strong> de forma consistente.
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- RESPONSABILIDADES -->
+<section id="responsabilidades">
+  <div class="section-eyebrow">Responsabilidades</div>
+  <h2 class="section-title">O que está nas suas mãos</h2>
+  <p class="section-sub">As dimensões de atuação dessa posição — sem cargos vagos, com expectativas claras.</p>
+
+  <div class="resp-grid">
+    <div class="resp-block" style="border-color:rgba(108,99,255,0.3)">
+      <div class="resp-title"><span style="font-size:22px">👥</span> Liderança de Pessoas</div>
+      <div class="resp-item">
+        <span class="resp-bullet">🌱</span>
+        <div><strong>PDI de cada engenheiro</strong><span>Construir e acompanhar planos individuais de desenvolvimento — do Jr ao Especialista. Promoções baseadas em critérios claros.</span></div>
+      </div>
+      <div class="resp-item">
+        <span class="resp-bullet">🎯</span>
+        <div><strong>1:1s estruturados e contínuos</strong><span>Cadência semanal ou quinzenal com foco em desenvolvimento, desbloqueios e feedback bidirecional.</span></div>
+      </div>
+      <div class="resp-item">
+        <span class="resp-bullet">🌡️</span>
+        <div><strong>Saúde psicológica do time</strong><span>Criar ambiente de segurança, onde errar e aprender são parte do processo. Identificar esgotamento antes que vire problema.</span></div>
+      </div>
+      <div class="resp-item">
+        <span class="resp-bullet">⚖️</span>
+        <div><strong>Gestão de jornada e carga de trabalho</strong><span>Garantir que o time não opere em modo crônico de sobrecarga. Hora extra é exceção com aprovação, não cultura.</span></div>
+      </div>
+    </div>
+
+    <div class="resp-block" style="border-color:rgba(0,210,160,0.3)">
+      <div class="resp-title"><span style="font-size:22px">⚙️</span> Execução Técnica</div>
+      <div class="resp-item">
+        <span class="resp-bullet">🏗️</span>
+        <div><strong>Referência arquitetural</strong><span>Participar e orientar decisões de arquitetura, garantindo consistência e escalabilidade nos sistemas de pagamento.</span></div>
+      </div>
+      <div class="resp-item">
+        <span class="resp-bullet">📊</span>
+        <div><strong>Gestão de fluxo e qualidade</strong><span>Monitorar Cycle Time, WIP, throughput e health score dos times. Agir sobre gargalos antes que virem problemas.</span></div>
+      </div>
+      <div class="resp-item">
+        <span class="resp-bullet">🧪</span>
+        <div><strong>Cultura de qualidade técnica</strong><span>DoR, DoD, code review, testes, observabilidade e débito técnico gerenciado. Qualidade como prática, não como checklist.</span></div>
+      </div>
+      <div class="resp-item">
+        <span class="resp-bullet">🚨</span>
+        <div><strong>Gestão de incidentes e P3s</strong><span>Reduzir recorrência de P3s através de análise de causa raiz e melhoria de processo. 28 P3s/mês na tribo é o baseline a ser melhorado.</span></div>
+      </div>
+    </div>
+
+    <div class="resp-block" style="border-color:rgba(245,158,11,0.3)">
+      <div class="resp-title"><span style="font-size:22px">🗺️</span> Estratégia e Produto</div>
+      <div class="resp-item">
+        <span class="resp-bullet">🔭</span>
+        <div><strong>Visão técnica de longo prazo</strong><span>Conectar o roadmap de produto com as capacidades técnicas do time. Antecipar riscos arquiteturais com 1-2 sprints de antecedência.</span></div>
+      </div>
+      <div class="resp-item">
+        <span class="resp-bullet">🤝</span>
+        <div><strong>Interface com Product e Negócio</strong><span>Traduzir restrições técnicas para stakeholders não-técnicos. Negociar prioridades com dados e transparência.</span></div>
+      </div>
+      <div class="resp-item">
+        <span class="resp-bullet">⚖️</span>
+        <div><strong>Débito técnico vs. velocidade</strong><span>Tomar e comunicar decisões conscientes sobre trade-offs. Nenhum débito aceito sem registro e plano de pagamento.</span></div>
+      </div>
+      <div class="resp-item">
+        <span class="resp-bullet">📋</span>
+        <div><strong>Compliance regulatório</strong><span>Garantir que o time entende e aplica as obrigações do BACEN/JDPI nas entregas do dia a dia, sem gargalo de conhecimento.</span></div>
+      </div>
+    </div>
+
+    <div class="resp-block" style="border-color:rgba(236,72,153,0.3)">
+      <div class="resp-title"><span style="font-size:22px">🌐</span> Cultura e Comunidade</div>
+      <div class="resp-item">
+        <span class="resp-bullet">🤖</span>
+        <div><strong>Acelerar adoção de IA</strong><span>O time já está em 54% de adoção. Sua missão é elevar esse número com responsabilidade — onde IA amplifica, não substitui.</span></div>
+      </div>
+      <div class="resp-item">
+        <span class="resp-bullet">📚</span>
+        <div><strong>Disseminação de boas práticas</strong><span>Capítulos, guildas, documentação técnica viva. Conhecimento que fica no time, não nas cabeças de 2 pessoas.</span></div>
+      </div>
+      <div class="resp-item">
+        <span class="resp-bullet">🔗</span>
+        <div><strong>Colaboração cross-squads</strong><span>Os 4 times são interdependentes. Garantir alinhamento e reduzir silos — especialmente em releases e incidentes.</span></div>
+      </div>
+      <div class="resp-item">
+        <span class="resp-bullet">🎤</span>
+        <div><strong>Visibilidade da liderança técnica</strong><span>Representar o time em fóruns de liderança, comunicar resultados e defender investimentos com dados.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- DESAFIOS -->
+<section id="desafios">
+  <div class="section-eyebrow">Desafios Reais</div>
+  <h2 class="section-title">O que vai exigir de você</h2>
+  <p class="section-sub">Os problemas não resolvidos que a pessoa certa vai adorar atacar.</p>
+
+  <div class="challenge-list">
+    <div class="challenge-item">
+      <div class="challenge-num">1</div>
+      <div>
+        <div class="challenge-title">Variabilidade alta de Cycle Time</div>
+        <div class="challenge-body">
+          O time de Payments PJ tem <strong>CV de 149% no Cycle Time</strong> — P85 de 25 dias enquanto o P50 é 2 dias. Dois itens ficaram 60 dias em ciclo em março. Isso indica mix de itens simples e épicos sem breakdown adequado, WIP descontrolado e falta de critérios claros de conclusão. Resolver isso exige tanto processo quanto trabalho de coaching individual.
+        </div>
+      </div>
+    </div>
+    <div class="challenge-item">
+      <div class="challenge-num">2</div>
+      <div>
+        <div class="challenge-title">28 P3s em um único mês na tribo</div>
+        <div class="challenge-body">
+          Distribuídos entre os 4 times, com <strong>Plataforma Pix PJ concentrando 11</strong>. A causa pode ser múltipla: qualidade de código, falta de observabilidade, deploys sem gates de qualidade, ou complexidade do domínio regulatório. Identificar a causa raiz e criar um plano de redução sustentável é uma das primeiras missões da posição.
+        </div>
+      </div>
+    </div>
+    <div class="challenge-item">
+      <div class="challenge-num">3</div>
+      <div>
+        <div class="challenge-title">Board que não reflete a realidade</div>
+        <div class="challenge-body">
+          Tasks que ficam no Backlog enquanto o dev já está trabalhando. Movimentações em lote no final da sprint. WIP real muito diferente do WIP do board. Isso <strong>distorce métricas, invisibiliza gargalos e impede o gestor de agir</strong> a tempo. Criar a cultura de board como ferramenta operacional — não como burocracia — requer mudança comportamental consistente.
+        </div>
+      </div>
+    </div>
+    <div class="challenge-item">
+      <div class="challenge-num">4</div>
+      <div>
+        <div class="challenge-title">Divergência entre GMUDs e batches entregues</div>
+        <div class="challenge-body">
+          Banking PJ PIX na IF tem <strong>99 GMUDs para 14 batches</strong> — 85 GMUDs sem batch associado. Payments PJ tem 99 GMUDs para 65 batches. Isso indica um volume significativo de operações de infra, config e ops que não estão sendo rastreados como entrega. Clareza sobre o que conta como trabalho do time é fundamental para gestão real de capacidade.
+        </div>
+      </div>
+    </div>
+    <div class="challenge-item">
+      <div class="challenge-num">5</div>
+      <div>
+        <div class="challenge-title">Times em estágios de maturidade muito diferentes</div>
+        <div class="challenge-body">
+          Plataforma Pix PJ com <strong>76% de adoção de IA e CT P85 saudável</strong>. Banking PJ PIX na IF com CT excelente mas throughput baixo. Payments PJ com alto volume mas alta variabilidade. XP Payments PJ com WIP elevado. Liderar 4 times com realidades tão distintas exige estratégia de gestão diferenciada — não uma abordagem única para todos.
+        </div>
+      </div>
+    </div>
+    <div class="challenge-item">
+      <div class="challenge-num">6</div>
+      <div>
+        <div class="challenge-title">Construir visibilidade técnica além do código</div>
+        <div class="challenge-body">
+          Alguns dos melhores engenheiros do time entregam de forma excepcional mas <strong>operam na sombra</strong> — contribuições de alto impacto sem o reconhecimento proporcional. Parte da missão da liderança é criar as condições para que boas contribuições técnicas gerem visibilidade, influência e oportunidades de crescimento para quem entrega.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- PERFIL -->
+<section id="perfil">
+  <div class="section-eyebrow">Perfil Esperado</div>
+  <h2 class="section-title">Quem estamos procurando</h2>
+  <p class="section-sub">Não o candidato perfeito — a pessoa certa para esse contexto específico.</p>
+
+  <div class="profile-grid">
+    <div class="profile-section" style="border-color:rgba(108,99,255,0.3)">
+      <div class="profile-section-title">🧠 Técnico — Obrigatório</div>
+      <div class="skill-item"><div class="skill-dot" style="background:var(--accent)"></div><div><strong>Experiência sólida com sistemas distribuídos de alta disponibilidade</strong><span> — pagamentos, banking ou fintech com volume transacional real.</span></div></div>
+      <div class="skill-item"><div class="skill-dot" style="background:var(--accent)"></div><div><strong>Fluência em arquitetura de microsserviços</strong><span> — Kafka, event-driven, outbox pattern, idempotência, resiliência.</span></div></div>
+      <div class="skill-item"><div class="skill-dot" style="background:var(--accent)"></div><div><strong>Experiência com gestão de qualidade técnica</strong><span> — ciclo de vida de um bug, gestão de débito técnico, cultura de testes.</span></div></div>
+      <div class="skill-item"><div class="skill-dot" style="background:var(--accent)"></div><div><strong>Métricas de fluxo</strong><span> — entende e usa Cycle Time, WIP, Throughput para tomada de decisão, não apenas como relatório.</span></div></div>
+      <div class="skill-item"><div class="skill-dot" style="background:var(--accent)"></div><div><strong>Conhecimento de ecossistema de pagamentos</strong><span> — Pix, JDPI/SPI é diferencial. Disposição para aprender rapidamente é mínimo.</span></div></div>
+    </div>
+
+    <div class="profile-section" style="border-color:rgba(0,210,160,0.3)">
+      <div class="profile-section-title">🤝 Liderança — Obrigatório</div>
+      <div class="skill-item"><div class="skill-dot" style="background:var(--accent2)"></div><div><strong>Experiência gerenciando times de 8+ engenheiros</strong><span> — com senioridades diferentes e em contextos de pressão de entrega.</span></div></div>
+      <div class="skill-item"><div class="skill-dot" style="background:var(--accent2)"></div><div><strong>Histórico de desenvolvimento de pessoas</strong><span> — promoções geradas, PDIs acompanhados, feedbacks que mudaram trajetórias.</span></div></div>
+      <div class="skill-item"><div class="skill-dot" style="background:var(--accent2)"></div><div><strong>Comunicação técnica com stakeholders não-técnicos</strong><span> — traduz complexidade, negocia com dados, não com opiniões.</span></div></div>
+      <div class="skill-item"><div class="skill-dot" style="background:var(--accent2)"></div><div><strong>Postura de ownership sem microgerenciamento</strong><span> — cria autonomia com responsabilidade, não controla com presença.</span></div></div>
+      <div class="skill-item"><div class="skill-dot" style="background:var(--accent2)"></div><div><strong>Resiliência e clareza sob pressão</strong><span> — incidentes P1 em produção com clientes impactados. Precisa ser o porto seguro do time.</span></div></div>
+    </div>
+
+    <div class="profile-section" style="border-color:rgba(245,158,11,0.3)">
+      <div class="profile-section-title">✨ Diferenciais</div>
+      <div class="skill-item"><div class="skill-dot" style="background:var(--yellow)"></div><div><strong>Experiência com regulação financeira (BACEN, PIX)</strong><span> — compliance técnico como parte do trabalho, não obstáculo.</span></div></div>
+      <div class="skill-item"><div class="skill-dot" style="background:var(--yellow)"></div><div><strong>Histórico com adoção de AI-assisted development</strong><span> — não como hype, como prática de produtividade real do time.</span></div></div>
+      <div class="skill-item"><div class="skill-dot" style="background:var(--yellow)"></div><div><strong>Experiência com mobile + backend</strong><span> — o time tem devs iOS, Android e backend. Liderança que entende os dois mundos é rara e valiosa.</span></div></div>
+      <div class="skill-item"><div class="skill-dot" style="background:var(--yellow)"></div><div><strong>Domínio de Kanban/FlowMetrics</strong><span> — usa dados de fluxo para decisões de processo, não apenas para apresentar em reports.</span></div></div>
+    </div>
+
+    <div class="profile-section" style="border-color:rgba(239,68,68,0.3)">
+      <div class="profile-section-title">🚫 Anti-perfil — Quem não vai se encaixar</div>
+      <div class="skill-item"><div class="skill-dot" style="background:var(--red)"></div><div><strong>Quem gerencia com presença e não com resultados</strong><span> — reunião desnecessária para cada decisão que poderia ser async.</span></div></div>
+      <div class="skill-item"><div class="skill-dot" style="background:var(--red)"></div><div><strong>Quem evita conversas difíceis</strong><span> — feedback necessário protelado, problemas de performance ignorados por "preservar o clima".</span></div></div>
+      <div class="skill-item"><div class="skill-dot" style="background:var(--red)"></div><div><strong>Quem resolve tudo no código pessoalmente</strong><span> — Tech Manager que quer ser o dev mais produtivo do time vai sufocar o crescimento de todos.</span></div></div>
+      <div class="skill-item"><div class="skill-dot" style="background:var(--red)"></div><div><strong>Quem não tem curiosidade técnica</strong><span> — esse domínio muda rápido. Liderança que para de aprender perde a credibilidade com o time em 6 meses.</span></div></div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- SUCESSO -->
+<section id="sucesso">
+  <div class="section-eyebrow">Definição de Sucesso</div>
+  <h2 class="section-title">Como saberemos que deu certo</h2>
+  <p class="section-sub">Critérios claros por horizonte de tempo — sem "entregou bem" como métrica.</p>
+
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-horizon" style="background:rgba(108,99,255,0.12);color:#a99fff;border:1px solid rgba(108,99,255,0.2)">30 dias</div>
+      <div class="metric-icon">🗺️</div>
+      <div class="metric-label">Diagnóstico completo da estrutura</div>
+      <div class="metric-detail">1:1 com cada engenheiro, mapeamento de gaps, entendimento do contexto técnico e de negócio dos 4 squads.</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-horizon" style="background:rgba(0,210,160,0.1);color:#34d399;border:1px solid rgba(0,210,160,0.2)">60 dias</div>
+      <div class="metric-icon">📋</div>
+      <div class="metric-label">Processos operacionais claros</div>
+      <div class="metric-detail">Board correto em tempo real, gestão de suporte estruturada, PDIs iniciados, hora extra com processo definido.</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-horizon" style="background:rgba(245,158,11,0.1);color:#fbbf24;border:1px solid rgba(245,158,11,0.2)">90 dias</div>
+      <div class="metric-icon">📉</div>
+      <div class="metric-label">P3s em queda consistente</div>
+      <div class="metric-detail">Redução mensurável de incidentes. Causa raiz dos principais P3s mapeada e plano de ação ativo com o time.</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-horizon" style="background:rgba(59,130,246,0.1);color:#60a5fa;border:1px solid rgba(59,130,246,0.2)">6 meses</div>
+      <div class="metric-icon">⚡</div>
+      <div class="metric-label">Cycle Time previsível</div>
+      <div class="metric-detail">CV abaixo de 100% em todos os times. P85 dentro do SLE de cada squad. WIP controlado e visível.</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-horizon" style="background:rgba(236,72,153,0.1);color:#f472b6;border:1px solid rgba(236,72,153,0.2)">6 meses</div>
+      <div class="metric-icon">🌱</div>
+      <div class="metric-label">Time se desenvolvendo visivelmente</div>
+      <div class="metric-detail">PDIs ativos para todos, pelo menos 2 promoções ou reconhecimentos baseados em critérios claros, feedbacks bimestrais documentados.</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-horizon" style="background:rgba(168,85,247,0.1);color:#a78bfa;border:1px solid rgba(168,85,247,0.2)">12 meses</div>
+      <div class="metric-icon">🏆</div>
+      <div class="metric-label">Time autônomo e de alta performance</div>
+      <div class="metric-detail">Engenheiros que tomam decisões técnicas sem precisar de aprovação constante. Cultura de qualidade internalizada. Liderança reconhecida pelo negócio.</div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- O QUE OFERECEMOS -->
+<section>
+  <div class="section-eyebrow">Por que o PicPay</div>
+  <h2 class="section-title">O que você vai encontrar aqui</h2>
+  <p class="section-sub">Contexto honesto — sem promessas que não conseguimos cumprir.</p>
+
+  <div class="context-grid">
+    <div class="ctx-card purple">
+      <div class="ctx-icon" style="font-size:32px;margin-bottom:12px">🚀</div>
+      <div class="ctx-label">Escala real de produto financeiro</div>
+      <div class="ctx-sub">Pix, cartão e transferências para dezenas de milhares de empresas PJ. Problemas de engenharia que importam de verdade para o negócio.</div>
+    </div>
+    <div class="ctx-card green">
+      <div class="ctx-icon" style="font-size:32px;margin-bottom:12px">🤖</div>
+      <div class="ctx-label">Cultura AI-first genuína</div>
+      <div class="ctx-sub">54% de adoção de IA nas entregas não é marketing — é dado real de março/2026. Você vai liderar times na fronteira da engenharia moderna.</div>
+    </div>
+    <div class="ctx-card blue">
+      <div class="ctx-icon" style="font-size:32px;margin-bottom:12px">📊</div>
+      <div class="ctx-label">Gestão baseada em dados de fluxo</div>
+      <div class="ctx-sub">Cycle Time, WIP, Throughput — ferramentas e cultura para gestão técnica com dados reais, não feeling ou HiPPO.</div>
+    </div>
+    <div class="ctx-card yellow">
+      <div class="ctx-icon" style="font-size:32px;margin-bottom:12px">🌱</div>
+      <div class="ctx-label">Autonomia para construir a cultura</div>
+      <div class="ctx-sub">A estrutura existe, os problemas são claros. O que falta é a liderança para definir como o time vai operar daqui para frente.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div class="cta-title">Essa posição é para você?</div>
+  <p class="cta-sub">Se você leu até aqui e reconheceu os desafios como oportunidades — essa conversa vale a pena.</p>
+  <div class="cta-facts">
+    <div class="cta-fact">💳 Tribo Payments PJ</div>
+    <div class="cta-fact">👥 13+ engenheiros</div>
+    <div class="cta-fact">🏗️ 4 squads</div>
+    <div class="cta-fact">📍 São Paulo · Remoto</div>
+    <div class="cta-fact">🟢 Vaga Aberta</div>
+  </div>
+  <div style="font-size:14px;color:var(--muted);max-width:480px;text-align:center;line-height:1.7">
+    Entre em contato com o time de Talent Acquisition do PicPay ou com a liderança da Divisão de Serviços Financeiros PJ para dar o próximo passo.
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">◈ PicPay — Serviços Financeiros PJ</div>
+  <div class="footer-right">Payments PJ · Tech Manager · Gerado via HubAI Nitro</div>
+</footer>
+
+</body>
+</html>
